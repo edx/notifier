@@ -1,0 +1,133 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="initial-scale=1.0">    <!-- So that mobile webkit will display zoomed in -->
+    <meta name="format-detection" content="telephone=no"> <!-- disable auto telephone linking in iOS -->
+
+    <title>{{ title|default:"edX Discussion Digest" }}</title>
+    <style type="text/css">
+
+        .ReadMsgBody { width: 100%; background-color: #ebebeb;}
+        .ExternalClass {width: 100%; background-color: #ebebeb;}
+        .ExternalClass, .ExternalClass p, .ExternalClass span, .ExternalClass font, .ExternalClass td, .ExternalClass div {line-height:100%;}
+        body {-webkit-text-size-adjust:none; -ms-text-size-adjust:none;}
+        body {margin:0; padding:0;}
+        table {border-spacing:0;}
+        table td {border-collapse:collapse;}
+        .yshortcuts a {border-bottom: none !important;}
+
+
+        /* Constrain email width for small screens */
+        @media screen and (max-width: 600px) {
+            table[class="container"] {
+                width: 95% !important;
+            }
+        }
+
+        /* Give content more room on mobile */
+        @media screen and (max-width: 480px) {
+            td[class="container-padding"] {
+                padding-left: 12px !important;
+                padding-right: 12px !important;
+            }
+         }
+
+    </style>
+</head>
+<body style="margin:0; padding:10px 0;" bgcolor="#ebebeb" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0">
+
+<br>
+
+<!-- 100% wrapper (grey background) -->
+<table border="0" width="100%" height="100%" cellpadding="0" cellspacing="0" bgcolor="#ebebeb">
+  <tr>
+    <td align="center" valign="top" bgcolor="#ebebeb" style="background-color: #ebebeb">
+      <!-- 600px container (white background) -->
+      <table border="0" width="600" cellpadding="0" cellspacing="0" class="container" bgcolor="#ffffff" style="border-radius: 5px;">
+        <tr>
+          <td align="left" class="container-padding" bgcolor="#ffffff" style="background-color: #ffffff; border-radius: 5px; box-shadow: 0 1px 2px rgba(0,0,0,0.2); padding-left: 30px; padding-right: 30px; font-size: 14px; line-height: 20px; font-family: Open Sans, Helvetica, sans-serif; color: #333333;">
+            <br>
+
+            <!-- ### BEGIN CONTENT ### -->
+            
+            <table class="email-header" cellpadding="0" cellspacing="0" border="0">
+                <tbody>
+                    <tr>
+                        <td class="edx-logo" valign="middle">
+                            <!-- TODO: is this the proper logo image? -->
+                            <img src="{{ logo_image_url }}" alt="edX Logo" border="0" hspace="0" vspace="0" style="vertical-align:top;" class="logo">
+                        </td>
+                        <td valign="top" style="padding-left: 20px">
+                            <p style="margin: 0; color: #5597DD">{{ title }}</p>
+                            <p style="margin: 0; font-size: 12px; color: #777777">{{ description }}</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <br>
+            Hi {{user.name}},
+            <br><br>
+            You have {{thread_count}} discussion thread{% if thread_count > 1 %}s{% endif %} with updates {% if course_count > 1 %}across{% else %}in{% endif %} {{course_names}}.  The most recent highlights are shown below.  As a reminder, you can turn off all discussion digests from any course's Discussion Home page.
+            <br><br>
+            {% for course in digest.courses %}
+            <table class="course-table" cellpadding="0" cellspacing="0" border="0" style="width:100%; margin-bottom: 30px;">
+                <tbody>
+                    <tr>
+                        <td class="course-name" valign="middle">
+                            <div style="font-size: 16px; line-height: 24px;">
+                                {{ course.title }}
+                            </div>
+                        </td>   
+                    </tr>
+                    {% for thread in course.threads %}
+                        <tr>
+                        <td>
+                            <table class="course-thread" cellpadding="0" cellspacing="0" border="0" style="width: 100%;">
+                                <tbody>
+                                    <tr>
+                                        <td class="course-thread-title" valign="middle">
+                                            <a href="{{ thread.url }}" class="course-thread-link" style="display: block; border-bottom: 1px solid #cccccc; padding-bottom: 4px; margin-top: 15px; font-size: 16px; font-weight:bold; text-decoration: none; color: #5597DD">
+                                                <span>{{ thread.title|escape }}</span>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% for item in thread.items %}
+                                    <tr>
+                                        <td>
+                                            <br>
+                                            <div class="update-metadata"><span style="font-size: 12px; font-weight:bold; color:#aaaaaa">{{ item.author }}: </span><span style="font-style:italic; font-size: 12px; color: #aaaaaa;">on {{ item.dt }} UTC</span></div>
+                                            <div class="update-content">{{ item.body|escape }} </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% endfor %}
+            <br><br>
+            <div class="unsubscribe-tools" style="border-radius:3px; padding:10px; background-color:#eeeeee; font-size:12px;">
+            If you would like to stop receiving these updates, you can turn off all Course Discussion digests from any course's Discussion Home page. You can also <a href="{{ unsubscribe_url }}" class="unsubscribe-link">quickly turn off these notifications from this email.</a> 
+            </div>
+            <div class="physical-address" style="font-size: 10px; margin-top: 10px; text-align:center; color: #777777;"> edX, 11 Cambridge Center, Cambridge, MA 02142
+            </div>
+            <br>
+            <!-- ### END CONTENT ### -->
+          </td>
+        </tr>
+      </table>
+      <!--/600px container -->
+    </td>
+  </tr>
+</table>
+<!--/100% wrapper-->
+<br>
+<br>
+</body>
+</html>
+

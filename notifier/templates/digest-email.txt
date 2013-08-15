@@ -1,0 +1,27 @@
+* {{ title }} *
+{{ description }}
+---
+
+Hi {{ user.name }},
+
+You have {{thread_count}} discussion thread{% if thread_count > 1 %}s{% endif %} with updates {% if course_count > 1 %}across{% else %}in{% endif %} {{course_names}}.  The most recent highlights are shown below.  As a reminder, you can turn off all discussion digests from any course's Discussion Home page.
+
+
+{% for course in digest.courses %}
+
+[{{ course.title }}]
+
+{% for thread in course.threads %}
+{{ thread.title }}
+---
+{% for item in thread.items %}
+{{ item.body }}
+ - {{ item.author }} on {{ item.dt }} UTC
+
+{% endfor %}
+{% endfor %}
+{% endfor %}
+
+To unsubscribe from this list, go to: {{ unsubscribe_url }}
+To update your subscription preferences, go to: {{ preferences_url }}
+
