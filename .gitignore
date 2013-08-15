@@ -1,0 +1,5 @@
+*.pyc
+*.swp
+notifier.db
+*.DS_Store
+notifier.log
