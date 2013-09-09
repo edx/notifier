@@ -3,8 +3,6 @@ import logging
 import os
 import platform
 
-from celery.schedules import crontab
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
@@ -167,20 +165,14 @@ if LOG_FILE:
 
 CELERY_TIMEZONE = 'UTC'
 
+# set up schedule for forum digest job
 if FORUM_DIGEST_TASK_INTERVAL==1440:
     # in the production case, make the 24 hour cycle happen at a 
     # predetermined time of day (midnight UTC).
-    digest_schedule = crontab(minute=0, hour=0)
+    DIGEST_CRON_SCHEDULE = {'hour': 0}
 else:
-    # in special (testing) cases, just let celerybeat manage a timedelta.
-    digest_schedule = timedelta(minutes=FORUM_DIGEST_TASK_INTERVAL)
+    DIGEST_CRON_SCHEDULE = {'minute': '*/{}'.format(FORUM_DIGEST_TASK_INTERVAL) }
 
-CELERYBEAT_SCHEDULE = {
-    'send_digests': {
-        'task': 'notifier.tasks.do_forums_digests',
-        'schedule': digest_schedule,
-    },
-}
 DAILY_TASK_MAX_RETRIES = 2
 DAILY_TASK_RETRY_DELAY = 60
 
