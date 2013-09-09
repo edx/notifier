@@ -34,6 +34,10 @@ class BackendWrapper(object):
             # report an average timing to datadog
             dog_stats_api.histogram('notifier.send.time', elapsed / msg_count)
             dog_stats_api.increment('notifier.send.count', msg_count)
+            for msg in email_messages:
+                hdrs = dict((k, v) for k, v in dict(msg.message()).iteritems()
+                            if k.lower() not in ('date', 'from', 'subject', 'content-type', 'mime-version'))
+                logger.info("sent email: {}".format(repr(hdrs)))
         if msg_count != len(email_messages):
             logger.warn('send_messages() was called with %s messages but return value was %s',
                 len(email_messages), msg_count)
