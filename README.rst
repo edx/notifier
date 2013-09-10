@@ -19,7 +19,9 @@ To run tests: ``python manage.py test notifier``
 
 To start the celery worker: ``python manage.py celery worker``
 
-To run the nightly forums digest batch job (use --help to see
+To start the scheduler (triggers forums digest notifications on a regular interval): ``python manage.py scheduler``
+
+To manually trigger the nightly forums digest batch job, or to perform other diagnostics (use --help to see
 options): ``python manage.py forums_digest``
 
 License
