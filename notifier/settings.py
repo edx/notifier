@@ -3,10 +3,12 @@ import logging
 import os
 import platform
 
+HOME_DIR = os.getenv('HOME')             # have to put the sqlite db somewhere
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'notifier.db',                      # Or path to database file if using sqlite3.
+        'NAME': os.path.join(HOME_DIR, 'db', 'notifier.db'),  # Or path to database file if using sqlite3.
         'USER': '',                      # Not used with sqlite3.
         'PASSWORD': '',                  # Not used with sqlite3.
         'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
