@@ -2,6 +2,7 @@ from datetime import timedelta
 import logging
 import os
 import platform
+from theming import enable_theme
 
 DATABASES = {
     'default': {
@@ -85,6 +86,11 @@ LOG_LEVEL = os.getenv('LOG_LEVEL', 'INFO')
 
 # datadog
 DATADOG_API_KEY = os.getenv('DATADOG_API_KEY')
+
+# Theme
+THEME_NAME = os.getenv('THEME_NAME', None)
+if THEME_NAME is not None:
+    enable_theme(THEME_NAME)
 
 # celery
 import djcelery
