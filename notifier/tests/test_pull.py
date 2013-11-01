@@ -199,15 +199,15 @@ class PullTestCase(TestCase):
         with patch('requests.post', return_value=Mock(json={})) as p:         
             g = generate_digest_content(["a", "b", "c"], from_dt, to_dt)
             expected_api_url = '*test_cs_url*/api/v1/notifications'
-            expected_params = {
-                'api_key': '*test_cs_key*',
-                }
+            expected_headers = {
+                'X-Edx-Api-Key': '*test_cs_key*',
+            }
             expected_post_data = {
                 'user_ids': 'a,b,c',
                 'from': '2013-01-01 00:00:00', # TODO tz offset
                 'to': '2013-01-02 00:00:00'
             }
-            p.assert_called_once_with(expected_api_url, params=expected_params, data=expected_post_data)            
+            p.assert_called_once_with(expected_api_url, headers=expected_headers, data=expected_post_data)            
             self.assertRaises(StopIteration, g.next)
         
         # single result
