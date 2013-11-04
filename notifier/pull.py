@@ -97,9 +97,9 @@ def generate_digest_content(user_ids, from_dt, to_dt):
     api_url = settings.CS_URL_BASE + '/api/v1/notifications'
     user_ids = ','.join(map(str, user_ids))
     dt_format = '%Y-%m-%d %H:%M:%S%z'
-    params = {
-        'api_key': settings.CS_API_KEY,
-        }
+    headers = {
+        'X-Edx-Api-Key': settings.CS_API_KEY,
+    }
     data = {
         'user_ids': user_ids,
         'from': from_dt.strftime(dt_format),
@@ -108,7 +108,7 @@ def generate_digest_content(user_ids, from_dt, to_dt):
 
     with dog_stats_api.timer('notifier.comments_service.time'):
         logger.info('calling comments service to pull digests for %d user(s)', len(user_ids))
-        res = _http_post(api_url, params=params, data=data).json
+        res = _http_post(api_url, headers=headers, data=data).json
 
     return Parser.parse(res)
 

@@ -5,6 +5,10 @@ These are notable changes in notifier.  This is a rolling list of changes,
 in roughly chronological order, most recent first.  Add your entries at or near
 the top.
 
+**Comments Service Auth**
+Use HTTP header auth instead of URL parameter auth for comments service. This
+requires cs_comments_service commit cf39aab or later.
+
 **Batch Query Size**
 The setting FORUM_DIGEST_TASK_BATCH_SIZE, which sets the maximum number of users
 per query when pulling updates from the comments service, has been reduced from
