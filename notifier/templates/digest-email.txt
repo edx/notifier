@@ -15,13 +15,14 @@ You have {{thread_count}} discussion thread{% if thread_count > 1 %}s{% endif %}
 {{ thread.title }}
 ---
 {% for item in thread.items %}
+{{ item.author }}: on {{ item.dt }} UTC
+
 {{ item.body }}
- - {{ item.author }} on {{ item.dt }} UTC
 
 {% endfor %}
 {% endfor %}
 {% endfor %}
 
-To unsubscribe from this list, go to: {{ unsubscribe_url }}
-To update your subscription preferences, go to: {{ preferences_url }}
+If you would like to stop receiving these updates, you can turn off all Course Discussion digests from any course's Discussion Home page. You can also quickly turn off these notifications by going to {{unsubscribe_url}}.
 
+edX, 11 Cambridge Center, Cambridge, MA 02142
