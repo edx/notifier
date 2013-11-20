@@ -9,6 +9,7 @@ from django.conf import settings
 from django.template.loader import get_template
 from django.template import Context
 from django.utils.html import strip_tags
+from django.utils.translation import ugettext as _
 from statsd import statsd
 
 from notifier.user import UsernameCipher
@@ -24,21 +25,6 @@ THREAD_ITEM_MAXLEN = 140
 
 
 logger = logging.getLogger(__name__)
-
-
-def _clean_markup(content):
-    """
-    Remove any unwanted markup from `content` prior to rendering in digest form.
-
-    >>> # strip html inside a post
-    >>> _clean_markup('Hello, <strong>World!</strong>')
-    u'Hello, World!'
-
-    >>> # unbalanced / malformed is OK
-    >>> _clean_markup('Hello, <strong color="green"/>World!<script type="invalid>')
-    u'Hello, World!'
-    """
-    return strip_tags(content)
 
 
 def _trunc(s, length):
@@ -61,33 +47,49 @@ def _trunc(s, length):
     return s[:length - 3].rsplit(' ', 1)[0].strip() + '...'
 
 
-def _join_and(values):
+def _make_text_list(values):
     """
     Formatting helper.
 
-    Join a list of strings, using the comma and "and" properly (assuming
-    English).
+    Make a string containing a natural language list composed of the
+    given items.
 
-    >>> _join_and([])
+    >>> _make_text_list([])
     ''
-    >>> _join_and(['spam'])
+    >>> _make_text_list(['spam'])
     'spam'
-    >>> _join_and(['spam', 'eggs'])
-    'spam and eggs'
-    >>> _join_and(['spam', 'eggs', 'beans'])
-    'spam, eggs, and beans'
-    >>> _join_and(['spam', 'eggs', 'beans', 'cheese'])
-    'spam, eggs, beans, and cheese'
+    >>> _make_text_list(['spam', 'eggs'])
+    u'spam and eggs'
+    >>> _make_text_list(['spam', 'eggs', 'beans'])
+    u'spam, eggs, and beans'
+    >>> _make_text_list(['spam', 'eggs', 'beans', 'cheese'])
+    u'spam, eggs, beans, and cheese'
     """
+    # Translators: This string separates two items in a pair (e.g.
+    # "Foo and Bar"); note that this includes any necessary whitespace to
+    # accommodate languages that do not use whitespace in such a pair construct.
+    pair_sep = _(' and ')
+    # Translators: This string separates items in a list (e.g.
+    # "Foo, Bar, Baz, and Quux"); note that this includes any necessary
+    # whitespace to accommodate languages that do not use whitespace in
+    # such a list construct.
+    list_sep = _(', ')
+    # Translators: This string separates the final two items in a list (e.g.
+    # "Foo, Bar and Baz"); note that this includes any necessary whitespace to
+    # accommodate languages that do not use whitespace in such a list construct.
+    final_list_sep = _(", and ")
     if len(values) == 0:
         return ''
     elif len(values) == 1:
         return values[0]
     elif len(values) == 2:
-        return ' and '.join(values)
+        return pair_sep.join(values)
     else:
-        values[-1] = 'and ' + values[-1]
-        return ', '.join(values)
+        return u'{head}{final_list_sep}{tail}'.format(
+            head=list_sep.join(values[:-1]),
+            final_list_sep=final_list_sep,
+            tail=values[-1]
+        )
 
 
 def _get_course_title(course_id):
@@ -151,7 +153,7 @@ class DigestCourse(object):
 
 class DigestThread(object):
     def __init__(self, thread_id, course_id, commentable_id, title, items):
-        self.title = _trunc(_clean_markup(title), THREAD_TITLE_MAXLEN)
+        self.title = _trunc(strip_tags(title), THREAD_TITLE_MAXLEN)
         self.url = _get_thread_url(course_id, thread_id, commentable_id)
         self.items = sorted(items, reverse=True, key=lambda i: i.dt)[:MAX_THREAD_ITEMS]
  
@@ -161,7 +163,7 @@ class DigestThread(object):
 
 class DigestItem(object):
     def __init__(self, body, author, dt):
-        self.body = _trunc(_clean_markup(body), THREAD_ITEM_MAXLEN)
+        self.body = _trunc(strip_tags(body), THREAD_ITEM_MAXLEN)
         self.author = author
         self.dt = dt
 
@@ -191,7 +193,7 @@ def render_digest(user, digest, title, description):
         'title': title,
         'description': description,
         'course_count': len(digest.courses),
-        'course_names': _join_and([course.title for course in digest.courses]),
+        'course_names': _make_text_list([course.title for course in digest.courses]),
         'thread_count': sum(course.thread_count for course in digest.courses),
         'logo_image_url': "{}/static/images/header-logo.png".format(settings.LMS_URL_BASE),
         'unsubscribe_url': _get_unsubscribe_url(user['username'])
