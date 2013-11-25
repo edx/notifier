@@ -1,3 +1,5 @@
+{% load i18n %}
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
    "http://www.w3.org/TR/html4/loose.dtd">
 <html lang="en">
@@ -6,7 +8,7 @@
     <meta name="viewport" content="initial-scale=1.0">    <!-- So that mobile webkit will display zoomed in -->
     <meta name="format-detection" content="telephone=no"> <!-- disable auto telephone linking in iOS -->
 
-    <title>{{ title|default:"edX Discussion Digest" }}</title>
+    <title>{{ title }}</title>
     <style type="text/css">
 
         .ReadMsgBody { width: 100%; background-color: #ebebeb;}
@@ -67,9 +69,9 @@
                 </tbody>
             </table>
             <br>
-            Hi {{user.name}},
+            {% blocktrans with name=user.name %}Hi {{name}},{% endblocktrans %}
             <br><br>
-            You have {{thread_count}} discussion thread{% if thread_count > 1 %}s{% endif %} with updates {% if course_count > 1 %}across{% else %}in{% endif %} {{course_names}}.  The most recent highlights are shown below.  As a reminder, you can turn off all discussion digests from any course's Discussion Home page.
+            {% blocktrans count thread_count=thread_count %}You have {{thread_count}} discussion thread with updates in {{course_names}}. The most recent highlights are shown below. As a reminder, you can turn off all discussion digests from any course's Discussion Home page.{% plural %}You have {{thread_count}} discussion threads with updates in {{course_names}}. The most recent highlights are shown below. As a reminder, you can turn off all discussion digests from any course's Discussion Home page.{% endblocktrans %}
             <br><br>
             {% for course in digest.courses %}
             <table class="course-table" cellpadding="0" cellspacing="0" border="0" style="width:100%; margin-bottom: 30px;">
@@ -97,7 +99,9 @@
                                     <tr>
                                         <td>
                                             <br>
-                                            <div class="update-metadata"><span style="font-size: 12px; font-weight:bold; color:#aaaaaa">{{ item.author }}: </span><span style="font-style:italic; font-size: 12px; color: #aaaaaa;">on {{ item.dt }} UTC</span></div>
+                                            <div class="update-metadata">
+                                                {% blocktrans with author=item.author datetime=item.dt author_span_attrs='style="font-size: 12px; font-weight:bold; color:#aaaaaa"' datetime_span_attrs='style="font-style:italic; font-size: 12px; color: #aaaaaa;"' %}<span {{author_span_attrs}}>{{author}}: </span><span {{datetime_span_attrs}}>on {{datetime}} UTC</span>{% endblocktrans %}
+                                            </div>
                                             <div class="update-content">{{ item.body|escape }} </div>
                                         </td>
                                     </tr>
@@ -112,7 +116,7 @@
             {% endfor %}
             <br><br>
             <div class="unsubscribe-tools" style="border-radius:3px; padding:10px; background-color:#eeeeee; font-size:12px;">
-            If you would like to stop receiving these updates, you can turn off all Course Discussion digests from any course's Discussion Home page. You can also <a href="{{ unsubscribe_url }}" class="unsubscribe-link">quickly turn off these notifications from this email.</a> 
+              {% blocktrans with a_attrs='href="'|add:unsubscribe_url|add:'" class="unsubscribe-link"'|safe %}If you would like to stop receiving these updates, you can turn off all Course Discussion digests from any course's Discussion Home page. You can also <a {{a_attrs}}>quickly turn off these notifications from this email.</a>{% endblocktrans %}
             </div>
             <div class="physical-address" style="font-size: 10px; margin-top: 10px; text-align:center; color: #777777;"> edX, 11 Cambridge Center, Cambridge, MA 02142
             </div>

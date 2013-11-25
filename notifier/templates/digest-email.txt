@@ -1,12 +1,13 @@
+{% load i18n %}
+
 * {{ title }} *
 {{ description }}
 ---
 
-Hi {{ user.name }},
+{% blocktrans with name=user.name %}Hi {{name}},{% endblocktrans %}
 
-You have {{thread_count}} discussion thread{% if thread_count > 1 %}s{% endif %} with updates {% if course_count > 1 %}across{% else %}in{% endif %} {{course_names}}.  The most recent highlights are shown below.  As a reminder, you can turn off all discussion digests from any course's Discussion Home page.
-
-
+{% blocktrans count thread_count=thread_count %}You have {{thread_count}} discussion thread with updates in {{course_names}}. The most recent highlights are shown below. As a reminder, you can turn off all discussion digests from any course's Discussion Home page.{% plural %}You have {{thread_count}} discussion threads with updates in {{course_names}}. The most recent highlights are shown below. As a reminder, you can turn off all discussion digests from any course's Discussion Home page.{% endblocktrans %}
+ 
 {% for course in digest.courses %}
 
 [{{ course.title }}]
@@ -15,13 +16,14 @@ You have {{thread_count}} discussion thread{% if thread_count > 1 %}s{% endif %}
 {{ thread.title }}
 ---
 {% for item in thread.items %}
+{% blocktrans with author=item.author datetime=item.dt %}{{ author }}: on {{ datetime }} UTC{% endblocktrans %}
+
 {{ item.body }}
- - {{ item.author }} on {{ item.dt }} UTC
 
 {% endfor %}
 {% endfor %}
 {% endfor %}
 
-To unsubscribe from this list, go to: {{ unsubscribe_url }}
-To update your subscription preferences, go to: {{ preferences_url }}
+{% blocktrans %}If you would like to stop receiving these updates, you can turn off all Course Discussion digests from any course's Discussion Home page. You can also quickly turn off these notifications by going to {{unsubscribe_url}}.{% endblocktrans %}
 
+edX, 11 Cambridge Center, Cambridge, MA 02142
