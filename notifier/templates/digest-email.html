@@ -59,7 +59,7 @@
                     <tr>
                         <td class="edx-logo" valign="middle">
                             <!-- TODO: is this the proper logo image? -->
-                            <img src="{{ logo_image_url }}" alt="edX Logo" border="0" hspace="0" vspace="0" style="vertical-align:top;" class="logo">
+                            <img src="{{ logo_image_url }}" alt="Logo" border="0" hspace="0" vspace="0" style="vertical-align:top;" class="logo">
                         </td>
                         <td valign="top" style="padding-left: 20px">
                             <p style="margin: 0; color: #5597DD">{{ title }}</p>
@@ -118,8 +118,11 @@
             <div class="unsubscribe-tools" style="border-radius:3px; padding:10px; background-color:#eeeeee; font-size:12px;">
               {% blocktrans with a_attrs='href="'|add:unsubscribe_url|add:'" class="unsubscribe-link"'|safe %}If you would like to stop receiving these updates, you can turn off all Course Discussion digests from any course's Discussion Home page. You can also <a {{a_attrs}}>quickly turn off these notifications from this email.</a>{% endblocktrans %}
             </div>
-            <div class="physical-address" style="font-size: 10px; margin-top: 10px; text-align:center; color: #777777;"> edX, 11 Cambridge Center, Cambridge, MA 02142
+            {% if postal_address %}
+            <div class="postal-address" style="font-size: 10px; margin-top: 10px; text-align:center; color: #777777;">
+              {{postal_address}}
             </div>
+            {% endif %}
             <br>
             <!-- ### END CONTENT ### -->
           </td>

@@ -41,8 +41,7 @@ class TasksTestCase(TestCase):
         actual_html, mime_type = message.alternatives[0]
         self.assertEqual(mime_type, 'text/html')
 
-        self.assertEqual(message.from_email, '@'.join(
-            [settings.FORUM_DIGEST_EMAIL_SENDER, settings.EMAIL_DOMAIN]))
+        self.assertEqual(message.from_email, settings.FORUM_DIGEST_EMAIL_SENDER)
         self.assertEqual(message.to, [user['email']])
         self.assertEqual(message.subject, settings.FORUM_DIGEST_EMAIL_SUBJECT)
 
