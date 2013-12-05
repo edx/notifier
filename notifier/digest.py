@@ -196,7 +196,8 @@ def render_digest(user, digest, title, description):
         'course_names': _make_text_list([course.title for course in digest.courses]),
         'thread_count': sum(course.thread_count for course in digest.courses),
         'logo_image_url': "{}/static/images/header-logo.png".format(settings.LMS_URL_BASE),
-        'unsubscribe_url': _get_unsubscribe_url(user['username'])
+        'unsubscribe_url': _get_unsubscribe_url(user['username']),
+        'postal_address': settings.EMAIL_SENDER_POSTAL_ADDRESS,
         })
     
     text = get_template('digest-email.txt').render(context)

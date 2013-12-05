@@ -42,10 +42,7 @@ def generate_and_send_digests(users, from_dt, to_dt):
             msg = EmailMultiAlternatives(
                 settings.FORUM_DIGEST_EMAIL_SUBJECT,
                 text,
-                '@'.join(
-                    [settings.FORUM_DIGEST_EMAIL_SENDER,
-                     settings.EMAIL_DOMAIN]),
-
+                settings.FORUM_DIGEST_EMAIL_SENDER,
                 [user['email']]
             )
             msg.attach_alternative(html, "text/html")

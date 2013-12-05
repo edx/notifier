@@ -29,11 +29,14 @@ TEST_RUNNER = 'django_coverage.coverage_runner.CoverageRunner'
 
 # Misc. Notifier Formatting
 
-# this will be joined with '@'+EMAILER_DOMAIN as the msg sender
-FORUM_DIGEST_EMAIL_SENDER = 'notifications'
-FORUM_DIGEST_EMAIL_SUBJECT = 'edX.org Daily Discussion Digest'
-FORUM_DIGEST_EMAIL_TITLE = 'Discussion Digest'
-FORUM_DIGEST_EMAIL_DESCRIPTION = 'A digest of unread content from edX Course Discussions you are following.'
+FORUM_DIGEST_EMAIL_SENDER = os.getenv('FORUM_DIGEST_EMAIL_SENDER', 'notifications@example.org')
+FORUM_DIGEST_EMAIL_SUBJECT = os.getenv('FORUM_DIGEST_EMAIL_SUBJECT', 'Daily Discussion Digest')
+FORUM_DIGEST_EMAIL_TITLE = os.getenv('FORUM_DIGEST_EMAIL_TITLE', 'Discussion Digest')
+FORUM_DIGEST_EMAIL_DESCRIPTION = os.getenv(
+    'FORUM_DIGEST_EMAIL_DESCRIPTION',
+    'A digest of unread content from course discussions you are following.'
+)
+EMAIL_SENDER_POSTAL_ADDRESS = os.getenv('EMAIL_SENDER_POSTAL_ADDRESS')
 
 # Environment-specific settings
 
@@ -58,7 +61,6 @@ EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS')
 
 # email settings independent of backend
-EMAIL_DOMAIN = os.getenv('EMAIL_DOMAIN', 'notifications.edx.org')
 EMAIL_REWRITE_RECIPIENT = os.getenv('EMAIL_REWRITE_RECIPIENT')
 
 # secret key for generating unsub tokens
