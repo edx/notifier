@@ -24,6 +24,25 @@ To start the scheduler (triggers forums digest notifications on a regular interv
 To manually trigger the nightly forums digest batch job, or to perform other diagnostics (use --help to see
 options): ``python manage.py forums_digest``
 
+Internationalization and Localization
+----
+
+edX uses Transifex to host translations. To use the Transifex client, be sure it is installed (``pip install -r requirements.txt`` will do this for you), and follow the instructions here__ to set up your ``.transifexrc`` file.
+
+__ http://support.transifex.com/customer/portal/articles/1000855-configuring-the-client
+
+Django relies on GNU's gettext utilities, which must be installed on your system (packages are available via ``brew`` on OS X and ``apt-get`` on Ubuntu Linux) and on the PATH of the shell from which you run the commands below.
+
+To extract and upload translatable strings:  ``python manage.py makemessages -l en_US; tx push -s``
+
+To download and compile a translation: ``tx pull -l <locale>; python manage.py compilemessages``, where ``<locale>`` is the `locale name`__ for the desired language.
+
+__ https://docs.djangoproject.com/en/dev/topics/i18n/#term-locale-name
+
+To run the notifier in a language other than English, set the ``NOTIFIER_LANGUAGE`` environment variable to the `language code`__ for the desired language.
+
+__ https://docs.djangoproject.com/en/dev/topics/i18n/#term-language-code
+
 License
 -------
 
