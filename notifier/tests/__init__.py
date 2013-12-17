@@ -10,6 +10,7 @@ from notifier.tests import test_pull
 from notifier.tests import test_tasks
 from notifier.tests import test_user
 from notifier.tests import test_commands
+from notifier.tests import test_digest
 
 # imports to pick up module doctests
 from notifier import digest
@@ -27,6 +28,7 @@ def suite():
 
     # digest
     add_doc_tests(suite, digest)
+    add_unit_tests(suite, test_digest)
     
     # pull
     add_unit_tests(suite, test_pull)
