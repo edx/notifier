@@ -1,4 +1,5 @@
 {% load i18n %}
+{% autoescape off %}
 
 * {{ title }} *
 {{ description }}
@@ -27,3 +28,4 @@
 {% blocktrans %}If you would like to stop receiving these updates, you can turn off all Course Discussion digests from any course's Discussion Home page. You can also quickly turn off these notifications by going to {{unsubscribe_url}}.{% endblocktrans %}
 
 {{postal_address}}
+{% endautoescape %}
