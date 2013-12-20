@@ -4,6 +4,7 @@ General formatting and rendering helpers for digest notifications.
 
 import datetime
 import logging
+import struct
 
 from django.conf import settings
 from django.template.loader import get_template
@@ -34,17 +35,33 @@ def _trunc(s, length):
     Truncate the string `s` to no more than `length`, using ellipsis and
     without chopping words.
 
-    >>> _trunc("one two three", 13)
-    'one two three'
-    >>> _trunc("one two three", 12)
-    'one two...'
+    This function works on both str and unicode objects.  If a str
+    is passed, it may return a unicode. If a unicode is passed, it will
+    always return a unicode.
+
+    >>> _trunc(u"one two three", 13)
+    u'one two three'
+    >>> _trunc(u"one two three", 12)
+    u'one two...'
     """
+
+    # Some Python2.7 builds do not support non-BMP unicode characters.
+    # To function properly on such systems, we convert to code points
+    # inside this function before counting / slicing characters, and
+    # decode again prior to concatenating the output value.
+
     s = s.strip()
-    if len(s) <= length:
+    u = s.encode('utf-32-le')
+    pts = struct.unpack('<{}L'.format(len(u) / 4), u)
+    if len(pts) <= length:
         # nothing to do
         return s
+
     # truncate, taking an extra -3 off the orig string for the ellipsis itself
-    return s[:length - 3].rsplit(' ', 1)[0].strip() + '...'
+    # see above comment about non-BMP support for why this is done in such
+    # elaborate fashion.
+    uchr = lambda x: '\U{0:08x}'.format(x).decode('unicode-escape')
+    return ''.join(uchr(p) for p in pts[:length - 3]).rsplit(' ', 1)[0].strip() + '...'
 
 
 def _make_text_list(values):
