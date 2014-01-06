@@ -23,7 +23,6 @@ class DigestItemTestCase(TestCase):
     def test_CJK(self):
         self._test_unicode_data(u"ｲんﾉ丂 ｱo丂ｲ co刀ｲﾑﾉ刀丂 cﾌズ", u"ｲんﾉ丂 ｱo丂ｲ...")
 
-    @skip("Non-BMP characters are not handled correctly")
     def test_non_BMP(self):
         self._test_unicode_data(u"𝕋𝕙𝕚𝕤 𝕡𝕠𝕤𝕥 𝕔𝕠𝕟𝕥𝕒𝕚𝕟𝕤 𝕔𝕙𝕒𝕣𝕒𝕔𝕥𝕖𝕣𝕤 𝕠𝕦𝕥𝕤𝕚𝕕𝕖 𝕥𝕙𝕖 𝔹𝕄ℙ", u"𝕋𝕙𝕚𝕤 𝕡𝕠𝕤𝕥...")
 
@@ -48,7 +47,6 @@ class DigestThreadTestCase(TestCase):
     def test_CJK(self):
         self._test_unicode_data(u"ｲんﾉ丂 ｱo丂ｲ co刀ｲﾑﾉ刀丂 cﾌズ", u"ｲんﾉ丂 ｱo丂ｲ...")
 
-    @skip("Non-BMP characters are not handled correctly")
     def test_non_BMP(self):
         self._test_unicode_data(u"𝕋𝕙𝕚𝕤 𝕡𝕠𝕤𝕥 𝕔𝕠𝕟𝕥𝕒𝕚𝕟𝕤 𝕔𝕙𝕒𝕣𝕒𝕔𝕥𝕖𝕣𝕤 𝕠𝕦𝕥𝕤𝕚𝕕𝕖 𝕥𝕙𝕖 𝔹𝕄ℙ", u"𝕋𝕙𝕚𝕤 𝕡𝕠𝕤𝕥...")
 
@@ -91,7 +89,6 @@ class RenderDigestTestCase(TestCase):
     def test_CJK(self):
         self._test_unicode_data(u"ｲんﾉ丂 ｱo丂ｲ co刀ｲﾑﾉ刀丂 cﾌズ", u"ｲんﾉ丂 ｱo丂ｲ...")
 
-    @skip("Non-BMP characters are not handled correctly")
     def test_non_BMP(self):
         self._test_unicode_data(u"𝕋𝕙𝕚𝕤 𝕡𝕠𝕤𝕥 𝕔𝕠𝕟𝕥𝕒𝕚𝕟𝕤 𝕔𝕙𝕒𝕣𝕒𝕔𝕥𝕖𝕣𝕤 𝕠𝕦𝕥𝕤𝕚𝕕𝕖 𝕥𝕙𝕖 𝔹𝕄ℙ", u"𝕋𝕙𝕚𝕤 𝕡𝕠𝕤𝕥...")
 
