@@ -212,7 +212,7 @@ def render_digest(user, digest, title, description):
         'course_count': len(digest.courses),
         'course_names': _make_text_list([course.title for course in digest.courses]),
         'thread_count': sum(course.thread_count for course in digest.courses),
-        'logo_image_url': "{}/static/images/header-logo.png".format(settings.LMS_URL_BASE),
+        'logo_image_url': settings.LOGO_IMAGE_URL,
         'unsubscribe_url': _get_unsubscribe_url(user['username']),
         'postal_address': settings.EMAIL_SENDER_POSTAL_ADDRESS,
         })
