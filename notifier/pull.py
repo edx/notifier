@@ -95,13 +95,13 @@ def generate_digest_content(user_ids, from_dt, to_dt):
 
     # set up and execute the API call
     api_url = settings.CS_URL_BASE + '/api/v1/notifications'
-    user_ids = ','.join(map(str, user_ids))
+    user_ids_string = ','.join(map(str, user_ids))
     dt_format = '%Y-%m-%d %H:%M:%S%z'
     headers = {
         'X-Edx-Api-Key': settings.CS_API_KEY,
     }
     data = {
-        'user_ids': user_ids,
+        'user_ids': user_ids_string,
         'from': from_dt.strftime(dt_format),
         'to': to_dt.strftime(dt_format)
     }
