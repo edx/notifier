@@ -7,8 +7,8 @@
 
 {% blocktrans with name=user.name %}Hi {{name}},{% endblocktrans %}
 
-{% blocktrans count thread_count=thread_count %}You have {{thread_count}} discussion thread with updates in {{course_names}}. The most recent highlights are shown below. As a reminder, you can turn off all discussion digests from any course's Discussion Home page.{% plural %}You have {{thread_count}} discussion threads with updates in {{course_names}}. The most recent highlights are shown below. As a reminder, you can turn off all discussion digests from any course's Discussion Home page.{% endblocktrans %}
- 
+{% blocktrans count thread_count=thread_count %}You have {{thread_count}} discussion thread with updates in {{course_names}}.{% plural %}You have {{thread_count}} discussion threads with updates in {{course_names}}.{% endblocktrans %}
+
 {% for course in digest.courses %}
 
 [{{ course.title }}]
@@ -25,7 +25,7 @@
 {% endfor %}
 {% endfor %}
 
-{% blocktrans %}If you would like to stop receiving these updates, you can turn off all Course Discussion digests from any course's Discussion Home page. You can also quickly turn off these notifications by going to {{unsubscribe_url}}.{% endblocktrans %}
+{% blocktrans %}You are receiving these updates because you are following dicussions posts in at least one edX course. You can turn off all discussion digests from any course Discussion Home page. You can also quickly turn off these notifications by going to {{unsubscribe_url}}.{% endblocktrans %}
 
 {{postal_address}}
 {% endautoescape %}

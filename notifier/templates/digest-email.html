@@ -1,16 +1,17 @@
 {% load i18n %}
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
-   "http://www.w3.org/TR/html4/loose.dtd">
+    "http://www.w3.org/TR/html4/loose.dtd">
 <html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="initial-scale=1.0">    <!-- So that mobile webkit will display zoomed in -->
     <meta name="format-detection" content="telephone=no"> <!-- disable auto telephone linking in iOS -->
 
-    <title>{{ title }}</title>
-    <style type="text/css">
+    <title>{{title}}</title>
 
+    <style type="text/css">
+        /* Resets: see reset.css for details */
         .ReadMsgBody { width: 100%; background-color: #ebebeb;}
         .ExternalClass {width: 100%; background-color: #ebebeb;}
         .ExternalClass, .ExternalClass p, .ExternalClass span, .ExternalClass font, .ExternalClass td, .ExternalClass div {line-height:100%;}
@@ -20,11 +21,14 @@
         table td {border-collapse:collapse;}
         .yshortcuts a {border-bottom: none !important;}
 
-
         /* Constrain email width for small screens */
         @media screen and (max-width: 600px) {
             table[class="container"] {
                 width: 95% !important;
+            }
+
+            table[class="columns-container"] {
+                width: 100%;
             }
         }
 
@@ -36,99 +40,242 @@
             }
          }
 
+        /* Styles for forcing columns to rows */
+        @media only screen and (max-width : 600px) {
+
+            /* force container columns to (horizontal) blocks */
+            td[class="force-col"] {
+                display: block;
+                padding-right: 0 !important;
+            }
+            table[class="col-2"] {
+                /* unset table align="left/right" */
+                float: none !important;
+                width: 100% !important;
+
+                /* change left/right padding and margins to top/bottom ones */
+                margin-bottom: 12px;
+                border-bottom: 1px solid #eeeeee;
+            }
+
+            /* remove bottom border for last column/row */
+            table[id="last-col-2"] {
+                border-bottom: none !important;
+                margin-bottom: 0;
+            }
+
+            /* adjust text sizing for email type */
+            td[class="email-type"] {
+                line-height: 30px;
+            }
+
+            table[class="col-2-actions"] {
+                /* unset table align="left/right" */
+                float: none !important;
+                width: 100% !important;
+
+                /* change left/right padding and margins to top/bottom ones */
+                margin-bottom: 20px;
+            }
+
+            table[class="col-2-edx"] {
+                /* unset table align="left/right" */
+                float: none !important;
+                width: 100% !important;
+
+                /* change left/right padding and margins to top/bottom ones */
+                margin-bottom: 20px;
+            }
+        }
+
     </style>
+
 </head>
-<body style="margin:0; padding:10px 0;" bgcolor="#ebebeb" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0">
+<body style="margin:0; padding:10px 0;" bgcolor="#dddddd" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0">
 
 <br>
 
 <!-- 100% wrapper (grey background) -->
-<table border="0" width="100%" height="100%" cellpadding="0" cellspacing="0" bgcolor="#ebebeb">
-  <tr>
-    <td align="center" valign="top" bgcolor="#ebebeb" style="background-color: #ebebeb">
+<table border="0" width="100%" height="100%" cellpadding="0" cellspacing="0" bgcolor="#dddddd" style="padding-top:5px; padding-bottom: 5px; padding-left:5px; padding-right:5px;">
+    <tr>
+        <td align="center" valign="top" bgcolor="#dddddd" style="background-color: #dddddd;">
       <!-- 600px container (white background) -->
-      <table border="0" width="600" cellpadding="0" cellspacing="0" class="container" bgcolor="#ffffff" style="border-radius: 5px;">
+      <table border="0" width="600" cellpadding="0" cellspacing="0" class="container" bgcolor="#ffffff" style="border-radius: 5px; box-shadow: 0 0 2px #aaaaaa;">
         <tr>
-          <td align="left" class="container-padding" bgcolor="#ffffff" style="background-color: #ffffff; border-radius: 5px; box-shadow: 0 1px 2px rgba(0,0,0,0.2); padding-left: 30px; padding-right: 30px; font-size: 14px; line-height: 20px; font-family: Open Sans, Helvetica, sans-serif; color: #333333;">
-            <br>
-
-            <!-- ### BEGIN CONTENT ### -->
-            
-            <table class="email-header" cellpadding="0" cellspacing="0" border="0">
-                <tbody>
-                    <tr>
-                        <td class="edx-logo" valign="middle">
-                            <!-- TODO: is this the proper logo image? -->
-                            <img src="{{ logo_image_url }}" alt="Logo" border="0" hspace="0" vspace="0" style="vertical-align:top;" class="logo">
-                        </td>
-                        <td valign="top" style="padding-left: 20px">
-                            <p style="margin: 0; color: #5597DD">{{ title }}</p>
-                            <p style="margin: 0; font-size: 12px; color: #777777">{{ description }}</p>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            <br>
-            {% blocktrans with name=user.name %}Hi {{name}},{% endblocktrans %}
-            <br><br>
-            {% blocktrans count thread_count=thread_count %}You have {{thread_count}} discussion thread with updates in {{course_names}}. The most recent highlights are shown below. As a reminder, you can turn off all discussion digests from any course's Discussion Home page.{% plural %}You have {{thread_count}} discussion threads with updates in {{course_names}}. The most recent highlights are shown below. As a reminder, you can turn off all discussion digests from any course's Discussion Home page.{% endblocktrans %}
-            <br><br>
-            {% for course in digest.courses %}
-            <table class="course-table" cellpadding="0" cellspacing="0" border="0" style="width:100%; margin-bottom: 30px;">
-                <tbody>
-                    <tr>
-                        <td class="course-name" valign="middle">
-                            <div style="font-size: 16px; line-height: 24px;">
-                                {{ course.title }}
-                            </div>
-                        </td>   
-                    </tr>
-                    {% for thread in course.threads %}
-                        <tr>
-                        <td>
-                            <table class="course-thread" cellpadding="0" cellspacing="0" border="0" style="width: 100%;">
-                                <tbody>
-                                    <tr>
-                                        <td class="course-thread-title" valign="middle">
-                                            <a href="{{ thread.url }}" class="course-thread-link" style="display: block; border-bottom: 1px solid #cccccc; padding-bottom: 4px; margin-top: 15px; font-size: 16px; font-weight:bold; text-decoration: none; color: #5597DD">
-                                                <span>{{ thread.title|escape }}</span>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    {% for item in thread.items %}
-                                    <tr>
-                                        <td>
-                                            <br>
-                                            <div class="update-metadata">
-                                                {% blocktrans with author=item.author datetime=item.dt author_span_attrs='style="font-size: 12px; font-weight:bold; color:#aaaaaa"' datetime_span_attrs='style="font-style:italic; font-size: 12px; color: #aaaaaa;"' %}<span {{author_span_attrs}}>{{author}}: </span><span {{datetime_span_attrs}}>on {{datetime}} UTC</span>{% endblocktrans %}
-                                            </div>
-                                            <div class="update-content">{{ item.body|escape }} </div>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            {% endfor %}
-            <br><br>
-            <div class="unsubscribe-tools" style="border-radius:3px; padding:10px; background-color:#eeeeee; font-size:12px;">
-              {% blocktrans with a_attrs='href="'|add:unsubscribe_url|add:'" class="unsubscribe-link"'|safe %}If you would like to stop receiving these updates, you can turn off all Course Discussion digests from any course's Discussion Home page. You can also <a {{a_attrs}}>quickly turn off these notifications from this email.</a>{% endblocktrans %}
-            </div>
-            {% if postal_address %}
-            <div class="postal-address" style="font-size: 10px; margin-top: 10px; text-align:center; color: #777777;">
-              {{postal_address}}
-            </div>
-            {% endif %}
-            <br>
-            <!-- ### END CONTENT ### -->
-          </td>
+          <td class="container-padding" bgcolor="#ffffff" style="background-color: #ffffff; padding-left: 30px; padding-right: 30px; font-size: 14px; line-height: 20px; font-family: Open Sans, sans-serif; color: #333; border-top: 10px solid #1AA1E0; border-radius: 5px;">
+                <table border="0" cellpadding="0" cellspacing="0" class="pre-header-container">
+                  <tr>
+                    <td align="left" valign="middle" style="font-size:30px; font-style: bold; height: 50px; font-family: Open Sans, Arial, sans-serif;">
+                        <img src="{{ logo_image_url }}" height="30" alt="OpenedX" border="0" hspace="0" vspace="0" class="platform-img">
+                    </td>
+                    <td align="left" class="email-type" valign="top" style="font-size: 20px; vertical-align: middle; padding-left: 30px; font-family: Open Sans, Arial, sans-serif; color: #1AA1E0;">
+                        {{ title }}
+                    </td>
+                  </tr>
+                </table><!--/ end .pre-header-container-->
+            </td>
         </tr>
-      </table>
-      <!--/600px container -->
+        <tr>
+            <td class="container-padding" bgcolor="#ffffff" style="background-color: #ffffff; padding-left: 30px; padding-right: 30px; font-size: 13px; line-height: 20px; font-family: Open Sans, sans-serif; color: #333; border-radius: 5px;" align="left">
+                <br>
+                <!--/message introductory content -->
+                {% blocktrans with name=user.name %}Hi {{name}},{% endblocktrans %}
+                <br><br>
+                {% blocktrans count thread_count=thread_count %}You have {{thread_count}} discussion threads with updates in {{course_names}}. {% plural %}You have {{thread_count}} discussion threads with updates in {{course_names}}.{% endblocktrans %}
+                <!--/message introductory content -->
+                <br><br>
+            </td>
+        </tr>
+        {% for course in digest.courses %}
+        <tr>
+            <td class="container-padding" bgcolor="#ffffff" style="background-color: #ffffff; padding-left: 30px; padding-right: 30px; font-size: 14px; line-height: 20px; font-family: Open Sans, sans-serif; color: #333; background-color: #f3f3f3; border-top: 1px solid #cccccc; border-bottom: 1px solid #eeeeee;">
+
+                <table border="0" cellpadding="0" cellspacing="0" class="columns-container" style="width:100%;">
+                  <tr>
+                    <td class="force-col" style="padding-right: 20px;" valign="middle">
+
+                        <!-- ### COLUMN 1 - COURSE AND TITLE ### -->
+                        <table border="0" cellspacing="0" cellpadding="0" width="280" align="left" class="col-2">
+                        <tr>
+                            <td align="left" valign="top" style="font-size:13px; line-height: 20px; font-family: Open Sans, Arial, sans-serif; color: #aaaaaa;">
+                                <br>
+                                <!-- TODO: make thread_count variable only count this course's updates-->
+                                {{thread_count}} followed discussions with updates
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="left" valign="top" style="font-size:18px; line-height: 26px; font-family: Open Sans, Arial, sans-serif; font-style: bold; font-size:24px; color: #002D40;">
+                                {{ course.title }}
+                                <br><br>
+                            </td>
+                        </tr>
+                        </table>
+
+                    </td>
+                    <td class="force-col"  valign="middle">
+
+                        <!-- ### COLUMN 2 - GO TO COURSE ### -->
+                        <table border="0" cellspacing="0" cellpadding="10" width="100" align="right" class="col-2">
+                        <tr>
+                            <td align="center" valign="middle" style="font-size:13px; font-family: Open Sans, Arial, sans-serif; background-color: #1AA1E0; border-radius: 5px; box-shadow: 0 2px #002D40;">
+                                <!--TODO: make this link go to discussion forum with Posts I'm Following Section selected for relevant course -->
+                                <a href="#" style="color: #ffffff; text-decoration: none;">View Course</a>
+                            </td>
+                        </tr>
+                        </table>
+
+                    </td>
+                  </tr>
+                </table><!--/ end .columns-container-->
+            </td>
+        </tr>
+        {% for thread in course.threads %}
+        <tr>
+            <td class="container-padding" bgcolor="#ffffff" style="background-color: #ffffff; padding-left: 30px; padding-right: 30px; font-size: 13px; line-height: 20px; font-family: Open Sans, sans-serif; color: #333; border-radius: 5px;" align="left">
+                <!--thread title and url -->
+                <a href="{{ thread.url }}" class="course-thread-link" style="display: block; border-bottom: 1px solid #cccccc; padding-bottom: 4px; margin-top: 15px; font-size: 16px; font-weight:bold; text-decoration: none; color: #5597DD;">
+                    <span>{{ thread.title|escape }}</span>
+                </a>
+            </td>
+        </tr>
+        {% for item in thread.items %}
+        <tr>
+            <td class="container-padding" bgcolor="#ffffff" style="background-color: #ffffff; padding-left: 30px; padding-right: 30px; font-size: 13px; line-height: 20px; font-family: Open Sans, sans-serif; color: #333; border-radius: 5px;" align="left">
+            <br>
+                <!--thread update content -->
+                <div class="update-metadata">
+                    {% blocktrans with author=item.author datetime=item.dt author_span_attrs='style="font-size: 12px; font-weight:bold; color:#aaaaaa"' datetime_span_attrs='style="font-style:italic; font-size: 12px; color: #aaaaaa;"' %}<span {{author_span_attrs}}>{{author}}: </span><span {{datetime_span_attrs}}>on {{datetime}} UTC</span>{% endblocktrans %}
+                </div>
+                <div class="update-content">{{ item.body|escape }} </div>
+            </td>
+        </tr>
+        {% endfor %}
+        <br>
+        {% endfor %}
+        <br>
+        {% endfor %}
+        <tr>
+            <td class="container-padding" bgcolor="#ffffff" style="background-color: #ffffff; padding-left: 30px; padding-right: 30px; font-size: 14px; line-height: 20px; font-family: Open Sans, sans-serif; color: #333; background-color: #f3f3f3; border-bottom: 1px solid #cccccc; border-top: 1px solid #eeeeee;">
+
+                <table border="0" cellpadding="0" cellspacing="0" class="columns-container">
+                  <tr>
+                    <td class="force-col" style="padding-right: 20px;" valign="middle">
+
+                        <!-- ### COLUMN 1 - COPYRIGHT AND ADDRESS ### -->
+                        <table border="0" cellspacing="0" cellpadding="0" width="250" align="left" class="col-2-edx">
+                        <tr>
+                            <td align="left" valign="top" style="font-size: 10px; color: #aaaaaa; font-style: italic;">
+                                <br>
+                                Copyright © 2014 edX, All Rights. Reserved.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="left" valign="top" style="font-size: 10px; color: #aaaaaa;">
+                                141 Portland St, Cambridge, MA 02142
+                                <br><br>
+                            </td>
+                        </tr>
+                        </table>
+
+                    </td>
+                    <td class="force-col"  valign="middle">
+
+                        <!-- ### COLUMN 2 - CONNECT WITH EDX ### -->
+                        <table border="0" cellspacing="0" cellpadding="0" width="150" align="right" class="col-2-edx">
+                            <tr>
+                                <td align="center" valign="middle" style="padding-left: 5px; padding-right:5px;">
+                                    <a href='http://facebook.com/edxonline' target='_blank' style='color: #6DC6DD;font-weight: normal;word-wrap: break-word !important; vertical-align:middle; '><img align='none' height='30' alt='Facebook' src='images/FacebookIcon_gray.png' style='width: 30px; height: 30px; border: 0; line-height: 100%; outline: none; text-decoration: none;' width='30'></a>
+                                </td>
+                                <td align="center" valign="middle" style="padding-left: 5px; padding-right:5px;">
+                                    <a href='http://twitter.com/edxonline' target='_blank' style='color: #6DC6DD; font-weight: normal;word-wrap: break-word !important;  vertical-align:middle;'><img align='none' height='30' alt='Twitter' src='images/TwitterIcon_gray.png' style='width: 30px; height: 30px; border: 0; line-height: 100%; outline: none; text-decoration: none;' width='30'></a>
+                                </td>
+                                <td align="center" valign="middle" style="padding-left: 5px; padding-right:5px;">
+                                    <a href='https://plus.google.com/108235383044095082735' target='_blank' style='color: #6DC6DD; font-weight: normal; word-wrap: break-word !important; vertical-align:middle;'><img align='none' height='30' alt='Google+' src='images/GooglePlusIcon_gray.png' style='width: 30px; height: 30px; border: 0; line-height: 100%; outline: none; text-decoration: none;' width='42'></a>
+                                </td>
+                                <td align="center" valign="middle" style="padding-left: 5px; padding-right:5px;">
+                                    <a href='http://www.meetup.com/edX-Communities/' target='_blank' style='color: #6DC6DD;font-weight: normal;word-wrap: break-word !important;  vertical-align:middle;'><img align='none' height='30' alt='Meetup' src='images/MeetupIcon_gray.png' style='width: 30px; height: 30px; border: 0; line-height: 100%; outline: none; text-decoration: none;' width='30'></a>
+                                </td>
+                                <td align="center" valign="middle" style="padding-left: 5px; padding-right:5px;">
+                                    <a href='http://vk.com/edxrussia' target='_blank' style='color: #6DC6DD;font-weight: normal;word-wrap: break-word !important;  vertical-align:middle;'><img align='none' height='30' alt='VKontakte' src='images/VKontakteIcon_gray.png' style='width: 30px; height: 30px; border: 0; line-height: 100%; outline: none; text-decoration: none;' width='30'></a>
+                                </td>
+                                <td align="center" valign="middle" style="padding-left: 5px; padding-right:5px;">
+                                    <a href='http://www.linkedin.com/company/edx' target='_blank' style='color: #6DC6DD;font-weight: normal;word-wrap: break-word !important;  vertical-align:middle;'><img align='none' height='30' alt='LinkedIn' src='images/LinkedInIcon_gray.png' style='width: 30px; height: 30px; border: 0; line-height: 100%; outline: none; text-decoration: none;' width='30'></a>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                  </tr>
+                </table><!--/ end .columns-container-->
+            </td>
+        </tr>
+        <tr>
+            <td class="footer-padding" style="padding-left: 30px; padding-right: 30px; font-size: 13px; line-height: 20px; font-family: Open Sans, sans-serif; color: #002D40; border-radius: 5px;" align="left">
+                <!--footer content -->
+                <br>
+                <p>You are receiving these updates because you are following dicussions posts in at least one edX course. You can turn off all discussion digests from any edX course's Discussion Home page.</p>
+                <br>
+                <table border="0" cellpadding="0" cellspacing="0" class="columns-container">
+                  <tr>
+                    <td class="force-col" style="padding-right: 20px;" valign="middle">
+                        <!-- ### COLUMN 1 - MODIFY EMAIL SETTINGS ### -->
+                        <table border="0" cellspacing="0" cellpadding="0" width="220" align="left" class="col-2-actions">
+                            <tr>
+                                <td align="center" valign="top" style="font-size:13px; line-height: 24px; font-family: Open Sans, Arial, sans-serif; color: #aaaaaa;">
+                                    {% blocktrans with a_attrs='href="'|add:unsubscribe_url|add:'" class="unsubscribe-link"'|safe %}<a {{a_attrs}} style="display: block; text-decoration: none; color: #002D40; border: 1px solid #dddddd; box-shadow: 0 1px #dddddd; border-radius: 5px; padding: 10px;">Turn off these updates</a>{% endblocktrans %}
+                                </td>
+                            </tr>
+                        </table>
+
+                    </td>
+                  </tr>
+                </table><!--/ end footer-actions-container-->
+                <br>
+                <!--/ end footer content -->
+            </td>
+        </tr>
+    </table>
+    <!--/600px container -->
+
     </td>
   </tr>
 </table>
