@@ -12,25 +12,17 @@ TEST_API_KEY = 'ZXY123!@#$%'
 
 
 # some shorthand to quickly generate fixture results
-mkuser = lambda n: {
+mkresult = lambda n: {
     "id": n,
     "email": "email%d" % n, 
     "name": "name%d" % n, 
     "url": "url%d" % n,
-    "username": "user%d" % n
+    "username": "user%d" % n,
+    "preferences": {
+        DIGEST_NOTIFICATION_PREFERENCE_KEY: "pref%d" % n,
+    },
 }
-mkresult = lambda n: {
-    "url": "url%d" % n,
-    "user": mkuser(n),
-    "key": DIGEST_NOTIFICATION_PREFERENCE_KEY,
-    "value": "value%d" % n
-}
-mkexpected = lambda d: {
-    "id": d["user"]["id"],
-    "name": d["user"]["name"],
-    "email": d["user"]["email"],
-    "username": d["user"]["username"]
-}
+mkexpected = lambda d: dict([(key, val) for (key, val) in d.items() if key != "url"])
 
 
 @override_settings(US_API_KEY=TEST_API_KEY)
@@ -39,10 +31,8 @@ class UserTestCase(TestCase):
     """
 
     def setUp(self):
-        self.expected_api_url = "test_server_url/user_api/v1/user_prefs/"
-        self.expected_params = {"key":DIGEST_NOTIFICATION_PREFERENCE_KEY,
-                               "page_size":3,
-                               "page":1}
+        self.expected_api_url = "test_server_url/user_api/v1/preferences/{key}/users/".format(key=DIGEST_NOTIFICATION_PREFERENCE_KEY)
+        self.expected_params = {"page_size":3, "page":1}
         self.expected_headers = {'X-EDX-API-Key': TEST_API_KEY}
 
 
