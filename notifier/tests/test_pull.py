@@ -8,10 +8,11 @@ from dateutil.parser import parse as date_parse
 from django.test import TestCase
 from django.test.utils import override_settings
 from mock import MagicMock, Mock, patch
+import requests
 
 from notifier.digest import _trunc, THREAD_ITEM_MAXLEN, \
                             _get_thread_url, _get_course_title, _get_course_url
-from notifier.pull import Parser, generate_digest_content
+from notifier.pull import CommentsServiceException, Parser, generate_digest_content
 
 
 class ParserTestCase(TestCase):
@@ -183,20 +184,17 @@ class ParserTestCase(TestCase):
         self.assertEqual(digest_count, len(p))
 
 
-class PullTestCase(TestCase):
+@override_settings(CS_URL_BASE='*test_cs_url*', CS_API_KEY='*test_cs_key*')
+class GenerateDigestContentTestCase(TestCase):
     """
     """
 
-    @override_settings(
-        CS_URL_BASE='*test_cs_url*', CS_API_KEY='*test_cs_key*'
-        )
-    def test_generate_digest_content(self):
+    def test_empty(self):
         """
         """
-        # empty result
         from_dt = datetime.datetime(2013, 1, 1)
         to_dt = datetime.datetime(2013, 1, 2)
-        with patch('requests.post', return_value=Mock(json={})) as p:         
+        with patch('requests.post', return_value=Mock(status_code=200, json={})) as p:
             g = generate_digest_content(["a", "b", "c"], from_dt, to_dt)
             expected_api_url = '*test_cs_url*/api/v1/notifications'
             expected_headers = {
@@ -209,7 +207,17 @@ class PullTestCase(TestCase):
             }
             p.assert_called_once_with(expected_api_url, headers=expected_headers, data=expected_post_data)            
             self.assertRaises(StopIteration, g.next)
-        
-        # single result
-        # multiple result
 
+    # TODO: test_single_result, test_multiple_results
+
+    def test_service_connection_error(self):
+        from_dt = datetime.datetime(2013, 1, 1)
+        to_dt = datetime.datetime(2013, 1, 2)
+        with patch('requests.post', side_effect=requests.exceptions.ConnectionError) as p:
+            self.assertRaises(CommentsServiceException, generate_digest_content, ["a"], from_dt, to_dt)
+
+    def test_service_http_error(self):
+        from_dt = datetime.datetime(2013, 1, 1)
+        to_dt = datetime.datetime(2013, 1, 2)
+        with patch('requests.post', return_value=Mock(status_code=401)) as p:
+            self.assertRaises(CommentsServiceException, generate_digest_content, ["a"], from_dt, to_dt)
