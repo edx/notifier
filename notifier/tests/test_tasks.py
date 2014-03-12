@@ -16,7 +16,7 @@ from mock import patch, Mock
 
 from notifier.tasks import generate_and_send_digests, do_forums_digests
 from notifier.pull import Parser
-from notifier.user import UserServiceException
+from notifier.user import UserServiceException, DIGEST_NOTIFICATION_PREFERENCE_KEY
 
 
 # fixture data helper
@@ -24,7 +24,11 @@ usern = lambda n: {
     'name': 'user%d' % n,
     'id': n,
     'email': 'user%d@dummy.edu' %n,
-    'username': 'user%d' % n}
+    'username': 'user%d' % n,
+    'preferences': {
+        DIGEST_NOTIFICATION_PREFERENCE_KEY: 'pref%d' % n,
+    },
+}
 
 
 @override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,

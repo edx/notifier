@@ -92,7 +92,7 @@ class Command(BaseCommand):
 
     def show_content(self, users, from_dt, to_dt):
         all_content = generate_digest_content(
-            (u['id'] for u in users), from_dt, to_dt)
+            [u['id'] for u in users], from_dt, to_dt)
         # use django's encoder; builtin one doesn't handle datetime objects
         json.dump(list(all_content), self.stdout, cls=DigestJSONEncoder)
 

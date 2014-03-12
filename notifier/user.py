@@ -49,9 +49,8 @@ def get_digest_subscribers():
 
     The returned dicts will have keys "id", "name", and "email" (all strings).
     """
-    api_url = settings.US_URL_BASE + '/user_api/v1/user_prefs/'
+    api_url = settings.US_URL_BASE + '/user_api/v1/preferences/{key}/users/'.format(key=DIGEST_NOTIFICATION_PREFERENCE_KEY)
     params = {
-        'key': DIGEST_NOTIFICATION_PREFERENCE_KEY,
         'page_size': settings.US_RESULT_PAGE_SIZE,
         'page': 1
     }
@@ -61,9 +60,8 @@ def get_digest_subscribers():
         with dog_stats_api.timer('notifier.get_digest_subscribers.time'):
             data = _http_get(api_url, params=params, headers=_headers(), **_auth()).json
         for result in data['results']:
-            user = result['user']
-            del user['url']  # not used
-            yield user
+            del result['url']  # not used
+            yield result
         if data['next'] is None:
             break
         params['page'] += 1
