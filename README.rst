@@ -33,7 +33,7 @@ __ http://support.transifex.com/customer/portal/articles/1000855-configuring-the
 
 Django relies on GNU's gettext utilities, which must be installed on your system (packages are available via ``brew`` on OS X and ``apt-get`` on Ubuntu Linux) and on the PATH of the shell from which you run the commands below.
 
-To extract and upload translatable strings:  ``python manage.py makemessages -l en_US; tx push -s``
+To extract and upload translatable strings:  ``python manage.py makemessages -l en; tx push -s``
 
 To download and compile a translation: ``tx pull -l <locale>; python manage.py compilemessages``, where ``<locale>`` is the `locale name`__ for the desired language.
 

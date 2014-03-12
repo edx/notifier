@@ -192,7 +192,7 @@ BROKER_HEARTBEAT_CHECKRATE = 2
 # Each worker should only fetch one message at a time
 CELERYD_PREFETCH_MULTIPLIER = 1
 
-LANGUAGE_CODE = os.getenv('NOTIFIER_LANGUAGE', 'en-us')
+LANGUAGE_CODE = os.getenv('NOTIFIER_LANGUAGE', 'en')
 USE_L10N = True
 LOCALE_PATHS = (os.path.join(os.path.dirname(os.path.dirname(__file__)), 'locale'),)
 
