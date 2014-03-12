@@ -5,6 +5,7 @@ from django.test import TestCase
 from mock import patch
 
 from notifier.digest import Digest, DigestCourse, DigestItem, DigestThread, render_digest
+from notifier.user import LANGUAGE_PREFERENCE_KEY
 
 TEST_COURSE_ID = "test_org/test_num/test_course"
 TEST_COMMENTABLE = "test_commentable"
@@ -59,24 +60,31 @@ class DigestThreadTestCase(TestCase):
 
 @patch("notifier.digest.THREAD_TITLE_MAXLEN", 17)
 class RenderDigestTestCase(TestCase):
-    def _test_unicode_data(self, input_text, expected_text, expected_html=None):
-        user = {
-            "id": "0",
-            "username": "test_user",
-        }
-        digest = Digest([
+    def set_digest(self, thread_title):
+        self.digest = Digest([
             DigestCourse(
                 TEST_COURSE_ID,
                 [DigestThread(
                     "0",
                     TEST_COURSE_ID,
                     TEST_COMMENTABLE,
-                    input_text,
+                    thread_title,
                     [DigestItem("test content", None, None)]
                 )]
             )
         ])
-        (rendered_text, rendered_html) = render_digest(user, digest, "Test Title", "Test Description")
+
+    def setUp(self):
+        self.user = {
+            "id": "0",
+            "username": "test_user",
+            "preferences": {}
+        }
+        self.set_digest("test title")
+
+    def _test_unicode_data(self, input_text, expected_text, expected_html=None):
+        self.set_digest(input_text)
+        (rendered_text, rendered_html) = render_digest(self.user, self.digest, "Test Title", "Test Description")
         self.assertIn(expected_text, rendered_text)
         self.assertIn(expected_html if expected_html else expected_text, rendered_html)
 
@@ -101,3 +109,26 @@ class RenderDigestTestCase(TestCase):
 
     def test_string_interp(self):
         self._test_unicode_data(u"This post contains %s string interpolation #{syntax}", u"This post...")
+
+    @patch("notifier.digest.deactivate")
+    @patch("notifier.digest.activate")
+    def test_user_lang_pref_supported(self, mock_activate, mock_deactivate):
+        user_lang = "en"
+        self.user["preferences"][LANGUAGE_PREFERENCE_KEY] = user_lang
+        render_digest(self.user, self.digest, "dummy", "dummy")
+        mock_activate.assert_called_with(user_lang)
+        mock_deactivate.assert_called()
+
+    @patch("notifier.digest.activate")
+    def test_user_lang_pref_unsupported(self, mock_activate):
+        user_lang = "x-unsupported-lang"
+        self.user["preferences"][LANGUAGE_PREFERENCE_KEY] = user_lang
+        render_digest(self.user, self.digest, "dummy", "dummy")
+        mock_activate.assert_not_called()
+
+    @patch("notifier.digest.activate")
+    def test_user_lang_pref_absent(self, mock_activate):
+        if LANGUAGE_PREFERENCE_KEY in self.user["preferences"]:
+            del self.user["preferences"][LANGUAGE_PREFERENCE_KEY]
+        render_digest(self.user, self.digest, "dummy", "dummy")
+        mock_activate.assert_not_called()

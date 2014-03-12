@@ -193,6 +193,9 @@ BROKER_HEARTBEAT_CHECKRATE = 2
 CELERYD_PREFETCH_MULTIPLIER = 1
 
 LANGUAGE_CODE = os.getenv('NOTIFIER_LANGUAGE', 'en')
+LANGUAGES = (
+    ("en", "English"),
+)
 USE_L10N = True
 LOCALE_PATHS = (os.path.join(os.path.dirname(os.path.dirname(__file__)), 'locale'),)
 

@@ -2,6 +2,7 @@
 General formatting and rendering helpers for digest notifications.
 """
 
+from contextlib import contextmanager
 import datetime
 import logging
 import struct
@@ -10,10 +11,10 @@ from django.conf import settings
 from django.template.loader import get_template
 from django.template import Context
 from django.utils.html import strip_tags
-from django.utils.translation import ugettext as _
+from django.utils.translation import ugettext as _, activate, deactivate
 from statsd import statsd
 
-from notifier.user import UsernameCipher
+from notifier.user import UsernameCipher, LANGUAGE_PREFERENCE_KEY
 
 # maximum number of threads to display per course
 MAX_COURSE_THREADS = 30
@@ -157,6 +158,19 @@ def _get_unsubscribe_url(username):
     return '{}/notification_prefs/unsubscribe/{}/'.format(settings.LMS_URL_BASE, token)
 
 
+@contextmanager
+def _activate_user_lang(user):
+    """
+    On enter, activate the user's preferred language, if supported. On exit,
+    deactivate the language.
+    """
+    user_lang = user["preferences"].get(LANGUAGE_PREFERENCE_KEY)
+    if user_lang and user_lang in dict(settings.LANGUAGES):
+        activate(user_lang)
+    yield
+    deactivate()
+
+
 class Digest(object):
     def __init__(self, courses):
         self.courses = sorted(courses, key=lambda c: c.title.lower())
@@ -216,8 +230,9 @@ def render_digest(user, digest, title, description):
         'unsubscribe_url': _get_unsubscribe_url(user['username']),
         'postal_address': settings.EMAIL_SENDER_POSTAL_ADDRESS,
         })
-    
-    text = get_template('digest-email.txt').render(context)
-    html = get_template('digest-email.html').render(context)
+
+    with _activate_user_lang(user):
+        text = get_template('digest-email.txt').render(context)
+        html = get_template('digest-email.html').render(context)
 
     return (text, html)
