@@ -5,6 +5,9 @@ from django.test import TestCase
 from mock import patch
 
 from notifier.digest import Digest, DigestCourse, DigestItem, DigestThread, render_digest
+from notifier.digest import _get_thread_url
+from notifier.digest import render_digest_flagged
+from notifier.tests.test_tasks import usern
 from notifier.user import LANGUAGE_PREFERENCE_KEY
 
 TEST_COURSE_ID = "test_org/test_num/test_course"
@@ -56,6 +59,28 @@ class DigestThreadTestCase(TestCase):
 
     def test_string_interp(self):
         self._test_unicode_data(u"This post contains %s string interpolation #{syntax}", u"This post...")
+
+
+class RenderDigestFlaggedTestCase(TestCase):
+    """
+    Test rendering of messages for digests of flagged posts
+    """
+    def test_posts(self):
+        """
+        Test that rendered messages contain the correct text
+        """
+        posts = [
+            _get_thread_url(TEST_COURSE_ID, TEST_COMMENTABLE, i)
+                for i in xrange(5)
+        ]
+        message = {
+            "course_id": TEST_COURSE_ID,
+            "recipient": usern(1),
+            "posts": posts,
+        }
+        rendered_text, rendered_html = render_digest_flagged(message)
+        for post in posts:
+            self.assertIn(post, rendered_text)
 
 
 @patch("notifier.digest.THREAD_TITLE_MAXLEN", 17)

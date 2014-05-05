@@ -15,6 +15,8 @@ from django.test.utils import override_settings
 from mock import patch, Mock
 
 from notifier.tasks import generate_and_send_digests, do_forums_digests
+from notifier.tasks import generate_and_send_digests_flagged
+from notifier.tasks import do_forums_digests_flagged
 from notifier.pull import Parser
 from notifier.user import UserServiceException, DIGEST_NOTIFICATION_PREFERENCE_KEY
 
@@ -29,6 +31,29 @@ usern = lambda n: {
         DIGEST_NOTIFICATION_PREFERENCE_KEY: 'pref%d' % n,
     },
 }
+
+def make_messages(count_messages=5, count_posts=10):
+    """
+    Create sample messages for testing
+
+    Args:
+        count_messages (int): number of total messages to be made
+        count_posts (int): number of posts per message
+
+    Returns:
+        messages (list): contains dicts of messages
+    """
+    return [
+        {
+            'course_id': 'org/course/run',
+            'recipient': usern(i),
+            'posts': [
+                'post{0}'.format(j)
+                for j in xrange(count_posts)
+            ],
+        }
+        for i in xrange(count_messages)
+    ]
 
 
 @override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
@@ -138,6 +163,92 @@ class TasksTestCase(TestCase):
                 else:
                     # should have raised
                     self.fail('task did not retry twice before giving up')
+
+    def test_generate_and_send_digests_empty_list_flagged(self):
+        """
+        Test that empty lists of messages are handled
+        """
+        messages = {}
+        task_result = generate_and_send_digests_flagged.delay(messages)
+        self.assertTrue(task_result.successful())
+
+    def test_generate_and_send_digests_partial_retry_flagged(self):
+        """
+        Test that partial retries are not attempted
+        """
+        def side_effect(msgs):
+            msgs[0].extra_headers['status'] = 200
+            raise SESMaxSendingRateExceededError(400, 'Throttling')
+
+        messages = make_messages()
+        mock_backend = Mock(
+            name='mock_backend',
+            send_messages=Mock(
+                side_effect=side_effect,
+            ),
+        )
+        with patch('notifier.connection_wrapper.dj_get_connection', return_value=mock_backend) as p:
+            # execute task - should fail, retry twice and still fail, then
+            # give up
+            try:
+                generate_and_send_digests_flagged.delay(messages)
+            except SESMaxSendingRateExceededError as e:
+                self.assertEqual(mock_backend.send_messages.call_count, 1)
+            else:
+                # should have raised
+                self.fail('task did not retry twice before giving up')
+
+    def test_generate_and_send_digests_retry_limit_flagged(self):
+        """
+        Test that retries are attempted
+        """
+        messages = make_messages()
+
+        # setting this here because override_settings doesn't seem to
+        # work on celery task configuration decorators
+        expected_num_tries = 1 + settings.FORUM_DIGEST_TASK_MAX_RETRIES
+        mock_backend = Mock(name='mock_backend', send_messages=Mock(
+            side_effect=SESMaxSendingRateExceededError(400, 'Throttling')))
+        with patch('notifier.connection_wrapper.dj_get_connection', return_value=mock_backend) as p2:
+            # execute task - should fail, retry twice and still fail, then
+            # give up
+            try:
+                task_result = generate_and_send_digests_flagged.delay(messages)
+            except SESMaxSendingRateExceededError as e:
+                self.assertEqual(
+                    mock_backend.send_messages.call_count,
+                    expected_num_tries,
+                )
+            else:
+                # should have raised
+                self.fail('task did not retry twice before giving up')
+
+    @override_settings(FORUM_DIGEST_TASK_BATCH_SIZE=9)
+    def test_do_forums_digests_flagged(self):
+        """
+        Test that we can send forum digests for flagged posts
+        """
+        data = [{
+            'course_id': 'org/course/run',
+            'recipient': usern(x),
+            'posts': [
+                'http://local.lan/courses/{0}'.format(n)
+                    for n in xrange(10)
+            ],
+        } for x in xrange(10)]
+        return_value = [usern(i) for i in xrange(10)]
+        with patch('notifier.tasks.get_moderators', return_value=return_value) as m:
+            task_result = do_forums_digests_flagged.delay()
+            self.assertTrue(task_result.successful())
+
+    @override_settings(FORUM_DIGEST_TASK_BATCH_SIZE=10)
+    def test_do_forums_digests_empty_flagged(self):
+        """
+        Test that we handle empty lists
+        """
+        input_file = "./notifier/tests/fixtures/flagged.empty"
+        task_result = do_forums_digests_flagged.delay(input_file=input_file)
+        self.assertTrue(task_result.successful())
 
     @override_settings(FORUM_DIGEST_TASK_BATCH_SIZE=10)
     def test_do_forums_digests(self):

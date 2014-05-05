@@ -1,0 +1,18 @@
+{% load i18n %}
+{% autoescape off %}
+
+* {{ title }} *
+{{ description }}
+---
+
+You currently have {{thread_count}} flagged discussion {% blocktrans count thread_count=thread_count %}thread{% plural %}threads{% endblocktrans %} in the {{course_id}} course.
+
+As a forum moderator, you can delete posts with the "delete" button for each post, or clear the flag by clicking the "Misuse Reported" flag. Please review and take action upon the following posts:
+
+Flagged Posts
+---
+{% for post in posts %}
+{{ post }}
+{% endfor %}
+
+{% endautoescape %}
