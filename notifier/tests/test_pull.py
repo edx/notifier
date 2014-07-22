@@ -194,7 +194,9 @@ class GenerateDigestContentTestCase(TestCase):
         """
         from_dt = datetime.datetime(2013, 1, 1)
         to_dt = datetime.datetime(2013, 1, 2)
-        with patch('requests.post', return_value=Mock(status_code=200, json={})) as p:
+        mock_response = Mock(status_code=200)
+        mock_response.json.return_value = {}
+        with patch('requests.post', return_value=mock_response) as p:
             g = generate_digest_content(["a", "b", "c"], from_dt, to_dt)
             expected_api_url = '*test_cs_url*/api/v1/notifications'
             expected_headers = {

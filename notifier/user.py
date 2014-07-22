@@ -55,11 +55,11 @@ def get_digest_subscribers():
         'page_size': settings.US_RESULT_PAGE_SIZE,
         'page': 1
     }
-    
+
     logger.info('calling user api for digest subscribers')
     while True:
         with dog_stats_api.timer('notifier.get_digest_subscribers.time'):
-            data = _http_get(api_url, params=params, headers=_headers(), **_auth()).json
+            data = _http_get(api_url, params=params, headers=_headers(), **_auth()).json()
         for result in data['results']:
             del result['url']  # not used
             yield result
@@ -74,7 +74,7 @@ def get_user(user_id):
     with dog_stats_api.timer('notifier.get_user.time'):
         r = _http_get(api_url, headers=_headers(), **_auth())
         if r.status_code == 200:
-            user = r.json
+            user = r.json()
             del user['url']
             return user
         elif r.status_code == 404:
