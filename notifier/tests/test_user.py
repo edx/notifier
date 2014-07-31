@@ -7,6 +7,7 @@ from mock import MagicMock, Mock, patch
 
 from notifier.user import get_digest_subscribers, DIGEST_NOTIFICATION_PREFERENCE_KEY
 
+from .utils import make_mock_json_response
 
 TEST_API_KEY = 'ZXY123!@#$%'
 
@@ -42,13 +43,12 @@ class UserTestCase(TestCase):
         """
 
         # empty result
-        mock_response = Mock()
-        mock_response.json.return_value = {
+        mock_response = make_mock_json_response(json={
             "count": 0,
             "next": None,
             "previous": None,
             "results": []
-        }
+        })
 
         with patch('requests.get', return_value=mock_response) as p:
             res = list(get_digest_subscribers())
@@ -58,20 +58,19 @@ class UserTestCase(TestCase):
                     headers=self.expected_headers)
             self.assertEqual(0, len(res))
 
-        
+
     @override_settings(US_URL_BASE="test_server_url", US_RESULT_PAGE_SIZE=3)
     def test_get_digest_subscribers_single_page(self):
         """
         """
 
         # single page result
-        mock_response = Mock()
-        mock_response.json.return_value = {
+        mock_response = make_mock_json_response(json={
             "count": 3,
             "next": None,
             "previous": None,
             "results": [mkresult(1), mkresult(2), mkresult(3)]
-        }
+        })
 
         with patch('requests.get', return_value=mock_response) as p:
             res = list(get_digest_subscribers())
@@ -108,8 +107,7 @@ class UserTestCase(TestCase):
         def side_effect(*a, **kw):
             return expected_pages.pop(0)
 
-        mock_response = Mock()
-        mock_response.json.return_value = expected_multi_p1
+        mock_response = make_mock_json_response(json=expected_multi_p1)
         with patch('requests.get', return_value=mock_response) as p:
             res = []
             g = get_digest_subscribers()
@@ -127,8 +125,7 @@ class UserTestCase(TestCase):
             # still should only have called requests.get() once
             self.assertEqual(1, p.call_count)
 
-        mock_response = Mock()
-        mock_response.json.return_value = expected_multi_p2
+        mock_response = make_mock_json_response(json=expected_multi_p2)
         with patch('requests.get', return_value=mock_response) as p:
             self.expected_params['page']=2
             self.assertEqual(mkexpected(mkresult(4)), g.next())
@@ -146,13 +143,12 @@ class UserTestCase(TestCase):
         """
         """
         # single page result
-        mock_response = Mock()
-        mock_response.json.return_value = {
+        mock_response = make_mock_json_response(json={
             "count": 3,
             "next": None,
             "previous": None,
             "results": [mkresult(1), mkresult(2), mkresult(3)]
-        }
+        })
 
         with patch('requests.get', return_value=mock_response) as p:
             res = list(get_digest_subscribers())

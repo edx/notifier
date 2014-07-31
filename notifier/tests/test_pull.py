@@ -14,6 +14,7 @@ from notifier.digest import _trunc, THREAD_ITEM_MAXLEN, \
                             _get_thread_url, _get_course_title, _get_course_url
 from notifier.pull import CommentsServiceException, Parser, generate_digest_content
 
+from .utils import make_mock_json_response
 
 class ParserTestCase(TestCase):
     """
@@ -194,8 +195,7 @@ class GenerateDigestContentTestCase(TestCase):
         """
         from_dt = datetime.datetime(2013, 1, 1)
         to_dt = datetime.datetime(2013, 1, 2)
-        mock_response = Mock(status_code=200)
-        mock_response.json.return_value = {}
+        mock_response = make_mock_json_response()
         with patch('requests.post', return_value=mock_response) as p:
             g = generate_digest_content(["a", "b", "c"], from_dt, to_dt)
             expected_api_url = '*test_cs_url*/api/v1/notifications'
