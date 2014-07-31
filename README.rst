@@ -2,8 +2,8 @@ Part of `edX code`__.
 
 __ http://code.edx.org/
 
-Notifier
-=======================
+Notifier |build-status| |coverage-status|
+=========================================
 
 This is a django application for edX platform notifications.
 
@@ -73,8 +73,7 @@ You can discuss this code on the `edx-code Google Group`__ or in the
 
 __ https://groups.google.com/forum/#!forum/edx-code
 
-
-
-
-
-
+.. |build-status| image:: https://travis-ci.org/edx/notifier.svg?branch=master
+   :target: https://travis-ci.org/edx/notifier
+.. |coverage-status| image:: https://coveralls.io/repos/edx/notifier/badge.png
+   :target: https://coveralls.io/r/edx/notifier
