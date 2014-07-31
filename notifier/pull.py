@@ -108,7 +108,7 @@ def generate_digest_content(user_ids, from_dt, to_dt):
 
     with dog_stats_api.timer('notifier.comments_service.time'):
         logger.info('calling comments service to pull digests for %d user(s)', len(user_ids))
-        res = _http_post(api_url, headers=headers, data=data).json
+        resp = _http_post(api_url, headers=headers, data=data)
 
-    return Parser.parse(res)
+    return Parser.parse(resp.json())
 
