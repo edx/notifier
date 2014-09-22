@@ -3,56 +3,81 @@
 
 import datetime
 import random
+import itertools
 
 from dateutil.parser import parse as date_parse
 from django.test import TestCase
 from django.test.utils import override_settings
-from mock import MagicMock, Mock, patch
+from mock import Mock, patch
 import requests
 
-from notifier.digest import _trunc, THREAD_ITEM_MAXLEN, \
-                            _get_thread_url, _get_course_title, _get_course_url
+from notifier.digest import (
+    _trunc, THREAD_ITEM_MAXLEN, _get_thread_url, _get_course_title, _get_course_url
+)
 from notifier.pull import CommentsServiceException, Parser, generate_digest_content
 
 from .utils import make_mock_json_response
 
-class ParserTestCase(TestCase):
-    """
-    """
 
+class DigestTestCase(TestCase):
+    """
+    Base class for tests that need to create mock digest items.
+    """
     @staticmethod
     def _item(v):
+        """Returns a mock item as would be returned by the comments service."""
         return {
             "body": "body: %s" % v,
             "username": "user_%s" % v,
-            "updated_at": (datetime.datetime(2013, 1, 1) + \
-                           datetime.timedelta(
-                               days=random.randint(0,365), 
-                               seconds=random.randint(0,86399)
-                               )
-                           ).isoformat()
-            }
+            "updated_at": (
+                datetime.datetime(2013, 1, 1) + datetime.timedelta(
+                    days=random.randint(0,365),
+                    seconds=random.randint(0,86399)
+                )).isoformat()
+        }
 
     @staticmethod
-    def _thread(v, items=[]):
+    def _thread(v, items=[], group_id=None):
+        """Returns a mock thread with the given items as would be returned by the comments service."""
         return {
-            "title": "title: %s" % v,
+            "title": v,
             "commentable_id": "commentable_id: %s" % v,
-            "content": items
-            }
+            "content": items,
+            "group_id": group_id,
+        }
 
     @staticmethod
     def _course(threads=[]):
+        """Returns a mock course with the given threads as would be returned by the comments service."""
         return dict(('id-%s' % random.random(), thread) for thread in threads)
 
     @staticmethod
-    def _digest(courses=[]):
-        return dict(('id-%s' % random.random(), course) for course in courses)
+    def _digest(courses=[], course_ids=None):
+        """
+        Returns a mock digest for the given courses as would be returned by the comments service.
+        course_ids should be a list of course_ids that correspond 1 to 1 with the list of courses.
+        If course_ids is None, generates random course_ids instead.
+        """
+        if course_ids is None:
+            course_ids = ['id-%s' % random.random() for _ in range(len(courses))]
+        return dict((course_ids[i], course) for i, course in enumerate(courses))
 
     @staticmethod
-    def _payload(digests=[]):
-        return dict(('id-%s' % random.random(), digest) for digest in digests)
+    def _payload(digests=[], user_ids=None):
+        """
+        Returns a mock payload for the given digests as would be returned by the comments service.
+        users should be a list of user ids that correspond 1 to 1 with the list of digests.
+        If users is None, generates random user ids instead.
+        """
+        if user_ids is None:
+            user_ids = ['id-%s' % random.random() for _ in range(len(digests))]
+        return dict((user_ids[i], digest) for i, digest in enumerate(digests))
 
+
+class ParserTestCase(DigestTestCase):
+    """
+    Tests for the Digest Parser classes.
+    """
     def _check_item(self, raw_item, parsed_item):
         self.assertEqual(parsed_item.body, _trunc(raw_item["body"], THREAD_ITEM_MAXLEN))
         self.assertEqual(parsed_item.author, raw_item["username"])
@@ -133,7 +158,7 @@ class ParserTestCase(TestCase):
                self._thread("t1", [self._item("d"), self._item("e"), self._item("f")]),
                self._thread("t2", [self._item("g"), self._item("h"), self._item("i")]),
             ])
-        self._check_course("some_course_id", c, Parser.course("some_course_id", c))
+        self._check_course("some_course_id", c, Parser.course("some_course_id", c, {}))
         
     def test_digest_simple(self):
         d = self._digest([
@@ -148,7 +173,7 @@ class ParserTestCase(TestCase):
                    self._thread("t12", [self._item("p"), self._item("q"), self._item("r")]),
                 ]),
             ])
-        self._check_digest("some_user_id", d, Parser.digest("some_user_id", d))
+        self._check_digest("some_user_id", d, Parser.digest(d, {}))
 
     def test_parse(self):
         p = self._payload([
@@ -178,7 +203,7 @@ class ParserTestCase(TestCase):
                 ]),
             ])
         digest_count = 0
-        for user_id, parsed_digest in Parser.parse(p):
+        for user_id, parsed_digest in Parser.parse(p, {}):
             #self._check_user(user_id, u, Parser.user(user_id, u))
             self.assertIsNotNone(self._find_raw_digest(parsed_digest, p))
             digest_count += 1
@@ -186,18 +211,24 @@ class ParserTestCase(TestCase):
 
 
 @override_settings(CS_URL_BASE='*test_cs_url*', CS_API_KEY='*test_cs_key*')
-class GenerateDigestContentTestCase(TestCase):
+class GenerateDigestContentTestCase(DigestTestCase):
     """
+    Tests for the generate_digest_content method.
     """
+    def setUp(self):
+        """
+        Create mock dates for testing.
+        """
+        self.from_dt = datetime.datetime(2013, 1, 1)
+        self.to_dt = datetime.datetime(2013, 1, 2)
 
     def test_empty(self):
         """
+        Test the empty mock response from the comments service.
         """
-        from_dt = datetime.datetime(2013, 1, 1)
-        to_dt = datetime.datetime(2013, 1, 2)
         mock_response = make_mock_json_response()
         with patch('requests.post', return_value=mock_response) as p:
-            g = generate_digest_content(["a", "b", "c"], from_dt, to_dt)
+            g = generate_digest_content({"a": {}, "b": {}, "c": {}}, self.from_dt, self.to_dt)
             expected_api_url = '*test_cs_url*/api/v1/notifications'
             expected_headers = {
                 'X-Edx-Api-Key': '*test_cs_key*',
@@ -213,13 +244,98 @@ class GenerateDigestContentTestCase(TestCase):
     # TODO: test_single_result, test_multiple_results
 
     def test_service_connection_error(self):
-        from_dt = datetime.datetime(2013, 1, 1)
-        to_dt = datetime.datetime(2013, 1, 2)
+        """
+        Test a mock connection error to the comments service.
+        """
         with patch('requests.post', side_effect=requests.exceptions.ConnectionError) as p:
-            self.assertRaises(CommentsServiceException, generate_digest_content, ["a"], from_dt, to_dt)
+            self.assertRaises(CommentsServiceException, generate_digest_content, {"a": {}}, self.from_dt, self.to_dt)
 
     def test_service_http_error(self):
-        from_dt = datetime.datetime(2013, 1, 1)
-        to_dt = datetime.datetime(2013, 1, 2)
+        """
+        Test a mock HTTP error to the comments service.
+        """
         with patch('requests.post', return_value=Mock(status_code=401)) as p:
-            self.assertRaises(CommentsServiceException, generate_digest_content, ["a"], from_dt, to_dt)
+            self.assertRaises(CommentsServiceException, generate_digest_content, {"a": {}}, self.from_dt, self.to_dt)
+
+    def test_cohort(self):
+        """
+        Test the generate_digest_content correctly filters digests according to user access to the threads.
+        """
+
+        # Create a mock user information dict as would be returned from the user service (LMS).
+        users_by_id = {
+            "moderator": {
+                "course_info": {
+                    "cohorted-course": {"see_all_cohorts": True},
+                    "non-cohorted-course": {"see_all_cohorts": True},
+                },
+                "expected_threads": [
+                    "group1-t01", "group2-t02", "all-groups-t03", "no-group-t11", "old-group-t12"
+                ],
+            },
+            "group1_user": {
+                "course_info": {
+                    "cohorted-course": {"cohort_id": "Group1"},
+                    "non-cohorted-course": {"see_all_cohorts": True},
+                },
+                "expected_threads": ["group1-t01", "all-groups-t03", "no-group-t11", "old-group-t12"],
+            },
+            "group2_user": {
+                "course_info": {
+                    "cohorted-course": {"cohort_id": "Group2"},
+                },
+                "expected_threads": ["group2-t02", "all-groups-t03"],
+            },
+            "unassigned_user": {
+                "course_info": {
+                    "cohorted-course": {"cohort_id": None},
+                    "non-cohorted-course": {"see_all_cohorts": True},
+                },
+                "expected_threads": ["all-groups-t03", "no-group-t11", "old-group-t12"],
+            },
+            "unenrolled_user": {
+                "course_info": {},
+                "expected_threads": [],
+            },
+        }
+        user_ids = users_by_id.keys()
+
+        # Create a mock payload with digest information as would be returned by the comments service.
+        digests = [
+            self._digest(
+                [
+                    self._course([
+                        self._thread("group1-t01", [self._item("a1"), self._item("b1"), self._item("c1")], "Group1"),
+                        self._thread("group2-t02", [self._item("a2"), self._item("b2"), self._item("c2")], "Group2"),
+                        self._thread("all-groups-t03", [self._item("a3"), self._item("b3"), self._item("c3")], None),
+                    ]),
+                    self._course([
+                        self._thread("no-group-t11", [self._item("a3"), self._item("b3"), self._item("c3")], None),
+                        self._thread("old-group-t12", [self._item("a3"), self._item("b3"), self._item("c3")], "OldGroup"),
+                    ]),
+                ],
+                ["cohorted-course", "non-cohorted-course"]
+            )
+            for _ in range(len(user_ids))
+        ]
+        payload = self._payload(digests, user_ids)
+
+        # Verify the notifier's generate_digest_content method correctly filters digests as expected.
+        mock_response = make_mock_json_response(json=payload)
+        with patch('requests.post', return_value=mock_response):
+            filtered_digests = generate_digest_content(users_by_id, self.from_dt, self.to_dt)
+
+            # Verify the returned digests are as expected for each user.
+            num_returned_users = 0
+            for user_id, digest in filtered_digests:
+                thread_titles = [t.title for t in itertools.chain(*(c.threads for c in digest.courses))]
+                self.assertSetEqual(
+                    set(users_by_id[user_id]["expected_threads"]),
+                    set(thread_titles),
+                    "Set of returned digest threads does not equal expected results"
+                )
+                num_returned_users += 1
+
+            # Make sure the number of digests equals the number of users.
+            # Otherwise, it's possible the guts of the for loop above never got called.
+            self.assertEquals(num_returned_users, len(user_ids))

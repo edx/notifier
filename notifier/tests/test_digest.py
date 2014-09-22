@@ -37,7 +37,10 @@ class DigestItemTestCase(TestCase):
 @patch("notifier.digest.THREAD_TITLE_MAXLEN", 17)
 class DigestThreadTestCase(TestCase):
     def _test_unicode_data(self, input_text, expected_text):
-        self.assertEqual(DigestThread("0", TEST_COURSE_ID, TEST_COMMENTABLE, input_text, []).title, expected_text)
+        self.assertEqual(
+            DigestThread("0", TEST_COURSE_ID, TEST_COMMENTABLE, input_text, []).title,
+            expected_text
+        )
 
     def test_ascii(self):
         self._test_unicode_data(u"This post contains ASCII.", u"This post...")

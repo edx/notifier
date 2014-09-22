@@ -25,7 +25,7 @@ def generate_and_send_digests(users, from_dt, to_dt):
     single background operation.
 
     `users` is an iterable of dictionaries, as returned by the edx user_api
-    (required keys are "id", "name", "username", and "email").
+    (required keys are "id", "name", "username", "email", and "course_info").
 
     `from_dt` and `to_dt` are datetime objects representing the start and end
     of the time window for which to generate a digest.
@@ -33,7 +33,7 @@ def generate_and_send_digests(users, from_dt, to_dt):
     users_by_id = dict((str(u['id']), u) for u in users)
     with closing(get_connection()) as cx:
         msgs = []
-        for user_id, digest in generate_digest_content(users_by_id.keys(), from_dt, to_dt):
+        for user_id, digest in generate_digest_content(users_by_id, from_dt, to_dt):
             user = users_by_id[user_id]
             # format the digest
             text, html = render_digest(
