@@ -46,7 +46,7 @@ def get_digest_subscribers():
 
     The returned dicts will have keys "id", "name", and "email" (all strings).
     """
-    api_url = settings.US_URL_BASE + '/user_api/v1/preferences/{key}/users/'.format(key=DIGEST_NOTIFICATION_PREFERENCE_KEY)
+    api_url = settings.US_URL_BASE + '/notifier_api/v1/users/'
     params = {
         'page_size': settings.US_RESULT_PAGE_SIZE,
         'page': 1
@@ -57,7 +57,6 @@ def get_digest_subscribers():
         with dog_stats_api.timer('notifier.get_digest_subscribers.time'):
             data = _http_get(api_url, params=params, headers=_headers(), **_auth()).json()
         for result in data['results']:
-            del result['url']  # not used
             yield result
         if data['next'] is None:
             break
@@ -65,13 +64,12 @@ def get_digest_subscribers():
 
 
 def get_user(user_id):
-    api_url = '{}/user_api/v1/users/{}/'.format(settings.US_URL_BASE, user_id)
+    api_url = '{}/notifier_api/v1/users/{}/'.format(settings.US_URL_BASE, user_id)
     logger.info('calling user api for user %s', user_id)
     with dog_stats_api.timer('notifier.get_user.time'):
         r = _http_get(api_url, headers=_headers(), **_auth())
         if r.status_code == 200:
             user = r.json()
-            del user['url']
             return user
         elif r.status_code == 404:
             return None

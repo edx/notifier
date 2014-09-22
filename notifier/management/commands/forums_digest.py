@@ -91,31 +91,29 @@ class Command(BaseCommand):
         json.dump(list(users), self.stdout)
 
     def show_content(self, users, from_dt, to_dt):
-        all_content = generate_digest_content(
-            [u['id'] for u in users], from_dt, to_dt)
+        users_by_id = dict((str(u['id']), u) for u in users)
+        all_content = generate_digest_content(users_by_id, from_dt, to_dt)
         # use django's encoder; builtin one doesn't handle datetime objects
         json.dump(list(all_content), self.stdout, cls=DigestJSONEncoder)
 
     def show_rendered(self, fmt, users, from_dt, to_dt):
+        users_by_id = dict((str(u['id']), u) for u in users)
 
         def _fail(msg):
             logger.warning('could not show rendered %s: %s', fmt, msg)
 
         try:
-            user = list(users)[0]
-        except IndexError, e:
-            _fail('no users found')
-            return
-
-        try:
-            user_id, digest = generate_digest_content(
-                [user['id']], from_dt, to_dt).next()
+            user_id, digest = generate_digest_content(users_by_id, from_dt, to_dt).next()
         except StopIteration:
             _fail('no digests found')
             return
 
         text, html = render_digest(
-            user, digest, settings.FORUM_DIGEST_EMAIL_TITLE, settings.FORUM_DIGEST_EMAIL_DESCRIPTION)
+            users_by_id[user_id],
+            digest,
+            settings.FORUM_DIGEST_EMAIL_TITLE,
+            settings.FORUM_DIGEST_EMAIL_DESCRIPTION
+        )
         if fmt == 'text':
             print >> self.stdout, text
         elif fmt == 'html':

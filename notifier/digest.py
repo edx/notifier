@@ -175,12 +175,21 @@ class Digest(object):
     def __init__(self, courses):
         self.courses = sorted(courses, key=lambda c: c.title.lower())
 
+    @property
+    def empty(self):
+        return len(self.courses) == 0
+
 class DigestCourse(object):
     def __init__(self, course_id, threads):
+        self.course_id = course_id
         self.title = _get_course_title(course_id)
         self.url = _get_course_url(course_id)
         self.thread_count = len(threads) # not the same as len(self.threads), see below
         self.threads = sorted(threads, reverse=True, key=lambda t: t.dt)[:MAX_COURSE_THREADS]
+
+    @property
+    def empty(self):
+        return len(self.threads) == 0
 
 class DigestThread(object):
     def __init__(self, thread_id, course_id, commentable_id, title, items):

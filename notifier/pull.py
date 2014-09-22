@@ -1,8 +1,6 @@
 """
 """
 
-from collections import namedtuple
-import datetime
 import logging
 import sys
 
@@ -17,9 +15,16 @@ logger = logging.getLogger(__name__)
 
 
 class CommentsServiceException(Exception):
+    """
+    Base class for exceptions raised by the Comments Service.
+    """
     pass
 
+
 def _http_post(*a, **kw):
+    """
+    Helper for posting HTTP requests to the comments service.
+    """
     try:
         logger.debug('POST %s %s', a[0], kw)
         response = requests.post(*a, **kw)
@@ -31,55 +36,95 @@ def _http_post(*a, **kw):
     return response
 
 
-class Parser(object):
-    
-    @staticmethod
-    def parse(payload):
-        return ((user_id, Parser.digest(user_id, user_dict)) 
-                for user_id, user_dict in payload.iteritems())
-    
-    @staticmethod
-    def digest(user_id, user_dict):
-        return Digest(
-                [Parser.course(course_id, course_dict)
-                    for course_id, course_dict in user_dict.iteritems()]
+def process_cs_response(payload, user_info_by_id):
+    """
+    Transforms and filters the comments service response to generate Digest
+    objects for each user supplied in user_info_by_id.
+    """
+    for user_id, user_content in payload.iteritems():
+        digest = _build_digest(user_content, user_info_by_id[user_id])
+        if not digest.empty:
+            yield user_id, digest
+
+def _build_digest(user_content, user_info):
+    """
+    Transforms course/thread/item data from the comments service's response
+    into a Digest for a single user.
+
+    Results will only include threads/items from courses in which the user has
+    been reported to be actively enrolled (by the user service).
+    """
+    return Digest(
+        filter(
+            lambda c: not c.empty,
+            [
+                _build_digest_course(
+                    course_id,
+                    course_dict,
+                    user_info["course_info"][course_id]
                 )
+                for course_id, course_dict in user_content.iteritems()
+                if course_id in user_info["course_info"]
+            ]
+        )
+    )
 
-    @staticmethod
-    def course(course_id, course_dict):
-        return DigestCourse(
-                course_id,
-                [Parser.thread(thread_id, course_id, thread_content)
-                    for thread_id, thread_content in course_dict.iteritems()]
-                )
+def _build_digest_course(course_id, course_content, user_course_info):
+    """
+    Transforms thread/item data from the comments service's response for a
+    specific user and course.
 
-    @staticmethod
-    def thread(thread_id, course_id, thread_dict):
-        return DigestThread(
-                thread_id,
-                course_id,
-                thread_dict["commentable_id"],
-                thread_dict["title"],
-                [Parser.item(item_dict)
-                    for item_dict in thread_dict["content"]]
-                )
+    The threads returned will be filtered by a group-level access check.
+    """
+    return DigestCourse(
+        course_id,
+        [
+            _build_digest_thread(thread_id, course_id, thread_content)
+            for thread_id, thread_content in course_content.iteritems()
+            if (
+                # the user is allowed to "see all cohorts" in the course, or
+                user_course_info['see_all_cohorts'] or
 
-    @staticmethod
-    def item(item_dict):
-        return DigestItem(
-                item_dict["body"],
-                item_dict["username"],
-                date_parse(item_dict["updated_at"])
-                )
+                # the thread is not associated with a group, or
+                thread_content.get('group_id') is None or
+
+                # the user's cohort_id matches the thread's group_id
+                user_course_info['cohort_id'] == thread_content.get('group_id')
+            )
+        ]
+    )
+
+def _build_digest_thread(thread_id, course_id, thread_content):
+    """
+    Parses a thread information for the given course and thread.
+    """
+    return DigestThread(
+        thread_id,
+        course_id,
+        thread_content["commentable_id"],
+        thread_content["title"],
+        [_build_digest_item(item_dict) for item_dict in thread_content["content"]]
+    )
+
+def _build_digest_item(item_dict):
+    """
+    Parses a digest item.
+    """
+    return DigestItem(
+        item_dict["body"],
+        item_dict["username"],
+        date_parse(item_dict["updated_at"])
+    )
 
 
-def generate_digest_content(user_ids, from_dt, to_dt):
+def generate_digest_content(users_by_id, from_dt, to_dt):
     """
     Function that calls the edX comments service API and yields a
     tuple of (user_id, digest) for each specified user that has >0
     discussion updates between the specified points in time.
 
-    `user_ids` should be an iterable of edX user ids.
+    `users_by_id` should be a dict of {user_id: user} where user-id is an edX
+    user id and user is the user dict returned by edx notifier_api.
     `from_dt` and `to_dt` should be datetime.datetime objects representing
     the desired time window.
 
@@ -92,10 +137,9 @@ def generate_digest_content(user_ids, from_dt, to_dt):
     user-digest tuple will be yielded for them (therefore, depending on the
     parameters passed, this function may not yield anything).
     """
-
     # set up and execute the API call
     api_url = settings.CS_URL_BASE + '/api/v1/notifications'
-    user_ids_string = ','.join(map(str, user_ids))
+    user_ids_string = ','.join(map(str, sorted(users_by_id.keys())))
     dt_format = '%Y-%m-%d %H:%M:%S%z'
     headers = {
         'X-Edx-Api-Key': settings.CS_API_KEY,
@@ -107,8 +151,7 @@ def generate_digest_content(user_ids, from_dt, to_dt):
     }
 
     with dog_stats_api.timer('notifier.comments_service.time'):
-        logger.info('calling comments service to pull digests for %d user(s)', len(user_ids))
+        logger.info('calling comments service to pull digests for %d user(s)', len(users_by_id))
         resp = _http_post(api_url, headers=headers, data=data)
 
-    return Parser.parse(resp.json())
-
+    return process_cs_response(resp.json(), users_by_id)
