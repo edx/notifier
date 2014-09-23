@@ -1,11 +1,14 @@
 # coding=utf-8
 
+from uuid import uuid4
+
 from unittest import skip
 from django.test import TestCase
 from mock import patch
 
+from notifier import settings
 from notifier.digest import Digest, DigestCourse, DigestItem, DigestThread, render_digest
-from notifier.user import LANGUAGE_PREFERENCE_KEY
+from notifier.user import DIGEST_NOTIFICATION_PREFERENCE_KEY, LANGUAGE_PREFERENCE_KEY
 
 TEST_COURSE_ID = "test_org/test_num/test_course"
 TEST_COMMENTABLE = "test_commentable"
@@ -77,8 +80,9 @@ class RenderDigestTestCase(TestCase):
     def setUp(self):
         self.user = {
             "id": "0",
-            "username": "test_user",
-            "preferences": {}
+            "preferences": {
+                DIGEST_NOTIFICATION_PREFERENCE_KEY: uuid4(),
+            }
         }
         self.set_digest("test title")
 
@@ -132,3 +136,12 @@ class RenderDigestTestCase(TestCase):
             del self.user["preferences"][LANGUAGE_PREFERENCE_KEY]
         render_digest(self.user, self.digest, "dummy", "dummy")
         mock_activate.assert_not_called()
+
+    def test_unsubscribe_url(self):
+        text, html = render_digest(self.user, self.digest, "dummy", "dummy")
+        expected_url = "{lms_url_base}/notification_prefs/unsubscribe/{token}/".format(
+            lms_url_base=settings.LMS_URL_BASE,
+            token=self.user["preferences"][DIGEST_NOTIFICATION_PREFERENCE_KEY]
+        )
+        self.assertIn(expected_url, text)
+        self.assertIn(expected_url, html)
