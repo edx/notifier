@@ -43,20 +43,20 @@ def user_has_access_to_course_group(user, course_id, group_id):
     """
 
     # get the user's course information
-    user_course_info = user.setdefault('course_info', {}).setdefault(course_id, {})
+    user_course_info = user.setdefault('course_info', {}).get(course_id)
 
     return (
         # the user is enrolled in the course
         user_course_info and (
 
             # the thread is not associated with a group, or
-            (group_id is None) or
+            group_id is None or
 
             # the user is allowed to "see all cohorts" in the course, or
-            (user_course_info.get('see_all_cohorts', False)) or
+            user_course_info['see_all_cohorts'] or
 
             # the user's cohort_id matches the thread's group_id
-            (user_course_info.get('cohort_id') == group_id)
+            user_course_info['cohort_id'] == group_id
         )
     )
 
@@ -134,7 +134,7 @@ def generate_digest_content(users_by_id, from_dt, to_dt):
     discussion updates between the specified points in time.
 
     `users_by_id` should be a dict of {user_id: user} where user-id is an edX
-    user id and user is the user dict returned by edx user_api.
+    user id and user is the user dict returned by edx notifier_api.
     `from_dt` and `to_dt` should be datetime.datetime objects representing
     the desired time window.
 

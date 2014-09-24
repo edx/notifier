@@ -32,7 +32,7 @@ class UserTestCase(TestCase):
     """
 
     def setUp(self):
-        self.expected_api_url = "test_server_url/user_api/v1/preferences/{key}/users/".format(key=DIGEST_NOTIFICATION_PREFERENCE_KEY)
+        self.expected_api_url = "test_server_url/notifier_api/v1/users/"
         self.expected_params = {"page_size":3, "page":1}
         self.expected_headers = {'X-EDX-API-Key': TEST_API_KEY}
 

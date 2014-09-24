@@ -204,7 +204,6 @@ class ParserTestCase(DigestTestCase):
             ])
         digest_count = 0
         for user_id, parsed_digest in Parser.parse(p, {}):
-            #self._check_user(user_id, u, Parser.user(user_id, u))
             self.assertIsNotNone(self._find_raw_digest(parsed_digest, p))
             digest_count += 1
         self.assertEqual(digest_count, len(p))
@@ -228,7 +227,11 @@ class GenerateDigestContentTestCase(DigestTestCase):
         """
         mock_response = make_mock_json_response()
         with patch('requests.post', return_value=mock_response) as p:
-            g = generate_digest_content({"a": {}, "b": {}, "c": {}}, self.from_dt, self.to_dt)
+            g = generate_digest_content(
+                {"a": {}, "b": {}, "c": {}},
+                self.from_dt,
+                self.to_dt
+            )
             expected_api_url = '*test_cs_url*/api/v1/notifications'
             expected_headers = {
                 'X-Edx-Api-Key': '*test_cs_key*',
@@ -248,14 +251,26 @@ class GenerateDigestContentTestCase(DigestTestCase):
         Test a mock connection error to the comments service.
         """
         with patch('requests.post', side_effect=requests.exceptions.ConnectionError) as p:
-            self.assertRaises(CommentsServiceException, generate_digest_content, {"a": {}}, self.from_dt, self.to_dt)
+            self.assertRaises(
+                CommentsServiceException,
+                generate_digest_content,
+                {"a": {}},
+                self.from_dt,
+                self.to_dt
+            )
 
     def test_service_http_error(self):
         """
         Test a mock HTTP error to the comments service.
         """
         with patch('requests.post', return_value=Mock(status_code=401)) as p:
-            self.assertRaises(CommentsServiceException, generate_digest_content, {"a": {}}, self.from_dt, self.to_dt)
+            self.assertRaises(
+                CommentsServiceException,
+                generate_digest_content,
+                {"a": {}},
+                self.from_dt,
+                self.to_dt
+            )
 
     def test_cohort(self):
         """
@@ -275,20 +290,20 @@ class GenerateDigestContentTestCase(DigestTestCase):
             },
             "group1_user": {
                 "course_info": {
-                    "cohorted-course": {"cohort_id": "Group1"},
+                    "cohorted-course": {"cohort_id": "Group1", "see_all_cohorts": False},
                     "non-cohorted-course": {"see_all_cohorts": True},
                 },
                 "expected_threads": ["group1-t01", "all-groups-t03", "no-group-t11", "old-group-t12"],
             },
             "group2_user": {
                 "course_info": {
-                    "cohorted-course": {"cohort_id": "Group2"},
+                    "cohorted-course": {"cohort_id": "Group2", "see_all_cohorts": False},
                 },
                 "expected_threads": ["group2-t02", "all-groups-t03"],
             },
             "unassigned_user": {
                 "course_info": {
-                    "cohorted-course": {"cohort_id": None},
+                    "cohorted-course": {"cohort_id": None, "see_all_cohorts": False},
                     "non-cohorted-course": {"see_all_cohorts": True},
                 },
                 "expected_threads": ["all-groups-t03", "no-group-t11", "old-group-t12"],

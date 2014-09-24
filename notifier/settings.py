@@ -75,6 +75,7 @@ CS_URL_BASE = os.getenv('CS_URL_BASE', 'http://localhost:4567')
 CS_API_KEY = os.getenv('CS_API_KEY', 'PUT_YOUR_API_KEY_HERE')
 
 # User Service Endpoint, for notification prefs
+# and Notifier API Endpoint, for notifier-specific data
 US_URL_BASE = os.getenv('US_URL_BASE', 'http://localhost:8000')
 US_API_KEY = os.getenv('US_API_KEY', 'PUT_YOUR_API_KEY_HERE')
 US_HTTP_AUTH_USER = os.getenv('US_HTTP_AUTH_USER', '')

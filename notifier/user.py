@@ -50,7 +50,7 @@ def get_digest_subscribers():
 
     The returned dicts will have keys "id", "name", and "email" (all strings).
     """
-    api_url = settings.US_URL_BASE + '/user_api/v1/preferences/{key}/users/'.format(key=DIGEST_NOTIFICATION_PREFERENCE_KEY)
+    api_url = settings.US_URL_BASE + '/notifier_api/v1/users/'
     params = {
         'page_size': settings.US_RESULT_PAGE_SIZE,
         'page': 1
