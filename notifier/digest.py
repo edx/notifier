@@ -179,7 +179,7 @@ class DigestCourse(object):
     def __init__(self, course_id, threads):
         self.title = _get_course_title(course_id)
         self.url = _get_course_url(course_id)
-        self.thread_count = len(threads)  # not the same as len(self.threads), see below
+        self.thread_count = len(threads) # not the same as len(self.threads), see below
         self.threads = sorted(threads, reverse=True, key=lambda t: t.dt)[:MAX_COURSE_THREADS]
 
 class DigestThread(object):
