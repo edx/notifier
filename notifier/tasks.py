@@ -25,7 +25,7 @@ def generate_and_send_digests(users, from_dt, to_dt):
     single background operation.
 
     `users` is an iterable of dictionaries, as returned by the edx user_api
-    (required keys are "id", "name", "username", "email", and "course_info").
+    (required keys are "id", "name", "username", "email", "preferences", and "course_info").
 
     `from_dt` and `to_dt` are datetime objects representing the start and end
     of the time window for which to generate a digest.

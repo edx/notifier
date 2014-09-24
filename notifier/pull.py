@@ -37,7 +37,7 @@ def _http_post(*a, **kw):
     return response
 
 
-def user_has_access_to_thread(user, course_id, group_id):
+def user_has_access_to_course_group(user, course_id, group_id):
     """
     Returns whether the given user has access to the given thread.
     """
@@ -56,7 +56,7 @@ def user_has_access_to_thread(user, course_id, group_id):
             (user_course_info.get('see_all_cohorts', False)) or
 
             # the user's cohort_id matches the thread's group_id
-            (user_course_info.get('cohort_id', None) == group_id)
+            (user_course_info.get('cohort_id') == group_id)
         )
     )
 
@@ -91,13 +91,14 @@ class Parser(object):
     def course(course_id, course_dict, user_info):
         """
         Parses a user's digest for the given course using that user's course and cohort information.
+        Specifically, it filters out the digests for the threads that are not accessible to the user.
         """
         return DigestCourse(
             course_id,
             [
                 Parser.thread(thread_id, course_id, thread_content)
                 for thread_id, thread_content in course_dict.iteritems()
-                if user_has_access_to_thread(user_info, course_id, thread_content.get("group_id", None))
+                if user_has_access_to_course_group(user_info, course_id, thread_content.get("group_id"))
             ]
         )
 
@@ -148,7 +149,7 @@ def generate_digest_content(users_by_id, from_dt, to_dt):
     """
     # set up and execute the API call
     api_url = settings.CS_URL_BASE + '/api/v1/notifications'
-    user_ids_string = ','.join(map(str, sorted(users_by_id)))
+    user_ids_string = ','.join(map(str, sorted(users_by_id.keys())))
     dt_format = '%Y-%m-%d %H:%M:%S%z'
     headers = {
         'X-Edx-Api-Key': settings.CS_API_KEY,
@@ -160,7 +161,7 @@ def generate_digest_content(users_by_id, from_dt, to_dt):
     }
 
     with dog_stats_api.timer('notifier.comments_service.time'):
-        logger.info('calling comments service to pull digests for %d user(s)', len(user_ids_string))
+        logger.info('calling comments service to pull digests for %d user(s)', len(users_by_id))
         resp = _http_post(api_url, headers=headers, data=data)
 
     return Parser.parse(resp.json(), users_by_id)
