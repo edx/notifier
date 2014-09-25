@@ -211,9 +211,6 @@ class ParserTestCase(DigestTestCase):
 
 @override_settings(CS_URL_BASE='*test_cs_url*', CS_API_KEY='*test_cs_key*')
 class GenerateDigestContentTestCase(DigestTestCase):
-    """
-    Tests for the generate_digest_content method.
-    """
     def setUp(self):
         """
         Create mock dates for testing.
@@ -221,10 +218,7 @@ class GenerateDigestContentTestCase(DigestTestCase):
         self.from_dt = datetime.datetime(2013, 1, 1)
         self.to_dt = datetime.datetime(2013, 1, 2)
 
-    def test_empty(self):
-        """
-        Test the empty mock response from the comments service.
-        """
+    def test_empty_response(self):
         mock_response = make_mock_json_response()
         with patch('requests.post', return_value=mock_response) as p:
             g = generate_digest_content(
@@ -247,9 +241,6 @@ class GenerateDigestContentTestCase(DigestTestCase):
     # TODO: test_single_result, test_multiple_results
 
     def test_service_connection_error(self):
-        """
-        Test a mock connection error to the comments service.
-        """
         with patch('requests.post', side_effect=requests.exceptions.ConnectionError) as p:
             self.assertRaises(
                 CommentsServiceException,
@@ -260,9 +251,6 @@ class GenerateDigestContentTestCase(DigestTestCase):
             )
 
     def test_service_http_error(self):
-        """
-        Test a mock HTTP error to the comments service.
-        """
         with patch('requests.post', return_value=Mock(status_code=401)) as p:
             self.assertRaises(
                 CommentsServiceException,
@@ -281,8 +269,8 @@ class GenerateDigestContentTestCase(DigestTestCase):
         users_by_id = {
             "moderator": {
                 "course_info": {
-                    "cohorted-course": {"see_all_cohorts": True},
-                    "non-cohorted-course": {"see_all_cohorts": True},
+                    "cohorted-course": {"see_all_cohorts": True, "cohort_id": None},
+                    "non-cohorted-course": {"see_all_cohorts": True, "cohort_id": None},
                 },
                 "expected_threads": [
                     "group1-t01", "group2-t02", "all-groups-t03", "no-group-t11", "old-group-t12"
@@ -290,21 +278,22 @@ class GenerateDigestContentTestCase(DigestTestCase):
             },
             "group1_user": {
                 "course_info": {
-                    "cohorted-course": {"cohort_id": "Group1", "see_all_cohorts": False},
-                    "non-cohorted-course": {"see_all_cohorts": True},
+                    "cohorted-course": {"see_all_cohorts": False, "cohort_id": "Group1"},
+                    "non-cohorted-course": {"see_all_cohorts": True, "cohort_id": None},
                 },
                 "expected_threads": ["group1-t01", "all-groups-t03", "no-group-t11", "old-group-t12"],
             },
             "group2_user": {
                 "course_info": {
-                    "cohorted-course": {"cohort_id": "Group2", "see_all_cohorts": False},
+                    "cohorted-course": {"see_all_cohorts": False, "cohort_id": "Group2"},
+                    "non-cohorted-course": {"see_all_cohorts": True, "cohort_id": "dummy"},
                 },
-                "expected_threads": ["group2-t02", "all-groups-t03"],
+                "expected_threads": ["group2-t02", "all-groups-t03", "no-group-t11", "old-group-t12"],
             },
             "unassigned_user": {
                 "course_info": {
-                    "cohorted-course": {"cohort_id": None, "see_all_cohorts": False},
-                    "non-cohorted-course": {"see_all_cohorts": True},
+                    "cohorted-course": {"see_all_cohorts": False, "cohort_id": None},
+                    "non-cohorted-course": {"see_all_cohorts": True, "cohort_id": None},
                 },
                 "expected_threads": ["all-groups-t03", "no-group-t11", "old-group-t12"],
             },
