@@ -59,7 +59,7 @@ class DigestTestCase(TestCase):
         If course_ids is None, generates random course_ids instead.
         """
         if course_ids is None:
-            course_ids = ['id-%s' % random.random() for _ in range(len(courses))]
+            course_ids = ['id-%s' % random.random() for _ in courses]
         return dict((course_ids[i], course) for i, course in enumerate(courses))
 
     @staticmethod
@@ -70,7 +70,7 @@ class DigestTestCase(TestCase):
         If users is None, generates random user ids instead.
         """
         if user_ids is None:
-            user_ids = ['id-%s' % random.random() for _ in range(len(digests))]
+            user_ids = ['id-%s' % random.random() for _ in digests]
         return dict((user_ids[i], digest) for i, digest in enumerate(digests))
 
 
@@ -320,17 +320,20 @@ class GenerateDigestContentTestCase(DigestTestCase):
                 ],
                 ["cohorted-course", "non-cohorted-course"]
             )
-            for _ in range(len(user_ids))
+            for _ in user_ids
         ]
         payload = self._payload(digests, user_ids)
 
         # Verify the notifier's generate_digest_content method correctly filters digests as expected.
         mock_response = make_mock_json_response(json=payload)
         with patch('requests.post', return_value=mock_response):
-            filtered_digests = generate_digest_content(users_by_id, self.from_dt, self.to_dt)
+            filtered_digests = list(generate_digest_content(users_by_id, self.from_dt, self.to_dt))
+
+            # Make sure the number of digests equals the number of users.
+            # Otherwise, it's possible the guts of the for loop below never gets called.
+            self.assertEquals(len(filtered_digests), len(user_ids))
 
             # Verify the returned digests are as expected for each user.
-            num_returned_users = 0
             for user_id, digest in filtered_digests:
                 thread_titles = [t.title for t in itertools.chain(*(c.threads for c in digest.courses))]
                 self.assertSetEqual(
@@ -338,8 +341,3 @@ class GenerateDigestContentTestCase(DigestTestCase):
                     set(thread_titles),
                     "Set of returned digest threads does not equal expected results"
                 )
-                num_returned_users += 1
-
-            # Make sure the number of digests equals the number of users.
-            # Otherwise, it's possible the guts of the for loop above never got called.
-            self.assertEquals(num_returned_users, len(user_ids))
