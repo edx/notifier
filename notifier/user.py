@@ -68,13 +68,12 @@ def get_digest_subscribers():
 
 
 def get_user(user_id):
-    api_url = '{}/user_api/v1/users/{}/'.format(settings.US_URL_BASE, user_id)
+    api_url = '{}/notifier_api/v1/users/{}/'.format(settings.US_URL_BASE, user_id)
     logger.info('calling user api for user %s', user_id)
     with dog_stats_api.timer('notifier.get_user.time'):
         r = _http_get(api_url, headers=_headers(), **_auth())
         if r.status_code == 200:
             user = r.json()
-            del user['url']
             return user
         elif r.status_code == 404:
             return None
