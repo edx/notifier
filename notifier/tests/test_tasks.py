@@ -15,7 +15,7 @@ from django.test.utils import override_settings
 from mock import patch, Mock
 
 from notifier.tasks import generate_and_send_digests, do_forums_digests
-from notifier.pull import Parser
+from notifier.pull import process_cs_response
 from notifier.user import UserServiceException, DIGEST_NOTIFICATION_PREFERENCE_KEY
 
 
@@ -28,6 +28,9 @@ usern = lambda n: {
     'preferences': {
         DIGEST_NOTIFICATION_PREFERENCE_KEY: 'pref%d' % n,
     },
+    'course_info': {
+
+    }
 }
 
 
@@ -72,7 +75,7 @@ class TasksTestCase(TestCase):
         """
         data = json.load(
             open(join(dirname(__file__), 'cs_notifications.result.json')))
-        user_id, digest = Parser.parse(data, {}).next()
+        user_id, digest = process_cs_response(data, {}).next()
         user = usern(10)
         with patch('notifier.tasks.generate_digest_content', return_value=[(user_id, digest)]) as p:
 
@@ -97,7 +100,7 @@ class TasksTestCase(TestCase):
         data = json.load(
             open(join(dirname(__file__), 'cs_notifications.result.json')))
 
-        with patch('notifier.tasks.generate_digest_content', return_value=Parser.parse(data, {})) as p:
+        with patch('notifier.tasks.generate_digest_content', return_value=process_cs_response(data, {})) as p:
 
             # execute task
             task_result = generate_and_send_digests.delay(
@@ -118,7 +121,7 @@ class TasksTestCase(TestCase):
         data = json.load(
             open(join(dirname(__file__), 'cs_notifications.result.json')))
 
-        with patch('notifier.tasks.generate_digest_content', return_value=list(Parser.parse(data, {}))) as p:
+        with patch('notifier.tasks.generate_digest_content', return_value=list(process_cs_response(data, {}))) as p:
 
             # setting this here because override_settings doesn't seem to
             # work on celery task configuration decorators

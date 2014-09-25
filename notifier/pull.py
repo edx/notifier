@@ -37,94 +37,93 @@ def _http_post(*a, **kw):
     return response
 
 
-def user_has_access_to_course_group(user, course_id, group_id):
+def user_has_access_to_thread(course_id, user_info, thread_info):
     """
     Returns whether the given user has access to the given thread.
     """
 
-    # get the user's course information
-    user_course_info = user.setdefault('course_info', {}).get(course_id)
-
     return (
-        # the user is enrolled in the course
-        user_course_info and (
+        course_id in user_info['course_info'] and (
 
             # the thread is not associated with a group, or
-            group_id is None or
+            thread_info['group_id'] is None or
 
             # the user is allowed to "see all cohorts" in the course, or
-            user_course_info['see_all_cohorts'] or
+            user_info['course_info'][course_id]['see_all_cohorts'] or
 
             # the user's cohort_id matches the thread's group_id
-            user_course_info['cohort_id'] == group_id
+            user_info['course_info'][course_id]['cohort_id'] == thread_info['group_id']
         )
     )
 
 
-class Parser(object):
+def process_cs_response(payload, user_info_by_id):
     """
-    Provides methods to parse the payload returned by the comments service.
+    Transforms and filters the comments service response to generate Digest
+    objects for each user supplied in user_info_by_id.
     """
-    @staticmethod
-    def parse(payload, user_info_by_id):
-        """
-        Parses the given payload using the users' course and cohort information in the given user_info_by_id.
-        """
-        return (
-            (user_id, Parser.digest(user_digest, user_info_by_id.setdefault(user_id, {})))
-            for user_id, user_digest in payload.iteritems()
-        )
-    
-    @staticmethod
-    def digest(user_digest_dict, user_info):
-        """
-        Parses a user's digest using that user's course and cohort information.
-        """
-        return Digest(
-            [
-                Parser.course(course_id, course_dict, user_info)
-                for course_id, course_dict in user_digest_dict.iteritems()
-            ]
-        )
+    return (
+        (user_id, _build_digest(user_digest, user_info_by_id[user_id]))
+        for user_id, user_digest in payload.iteritems()
+        if user_id in user_info_by_id
+    )
 
-    @staticmethod
-    def course(course_id, course_dict, user_info):
-        """
-        Parses a user's digest for the given course using that user's course and cohort information.
-        Specifically, it filters out the digests for the threads that are not accessible to the user.
-        """
-        return DigestCourse(
-            course_id,
-            [
-                Parser.thread(thread_id, course_id, thread_content)
-                for thread_id, thread_content in course_dict.iteritems()
-                if user_has_access_to_course_group(user_info, course_id, thread_content.get("group_id"))
-            ]
-        )
+def _build_digest(user_digest_dict, user_info):
+    """
+    Transforms course/thread/item data from the comments service's response
+    into a Digest for a single user.
 
-    @staticmethod
-    def thread(thread_id, course_id, thread_dict):
-        """
-        Parses a thread information for the given course and thread.
-        """
-        return DigestThread(
-            thread_id,
-            course_id,
-            thread_dict["commentable_id"],
-            thread_dict["title"],
-            [Parser.item(item_dict) for item_dict in thread_dict["content"]]
-        )
+    Results will only include threads/items from courses in which the user has
+    been reported to be actively enrolled (by the user service).
+    """
+    return Digest(
+        [
+            _build_digest_course(course_id, course_dict, user_info)
+            for course_id, course_dict in user_digest_dict.iteritems()
+        ]
+    )
 
-    @staticmethod
-    def item(item_dict):
-        """
-        Parses a digest item.
-        """
-        return DigestItem(
-            item_dict["body"],
-            item_dict["username"],
-            date_parse(item_dict["updated_at"])
-        )
+def _build_digest_course(course_id, course_dict, user_info):
+    """
+    Transforms thread/item data from the comments service's response for a
+    specific user and course.
+
+    The threads returned will be filtered by a group-level access check.
+    See user_has_access_to_thread for how this works.
+    """
+    return DigestCourse(
+        course_id,
+        [
+            _build_digest_thread(thread_id, course_id, thread_content)
+            for thread_id, thread_content in course_dict.iteritems()
+            if user_has_access_to_thread(
+                user_info['course_info'][course_id],
+                thread_content
+            )
+        ]
+    )
+
+def _build_digest_thread(thread_id, course_id, thread_dict):
+    """
+    Parses a thread information for the given course and thread.
+    """
+    return DigestThread(
+        thread_id,
+        course_id,
+        thread_dict["commentable_id"],
+        thread_dict["title"],
+        [_build_digest_item(item_dict) for item_dict in thread_dict["content"]]
+    )
+
+def _build_digest_item(item_dict):
+    """
+    Parses a digest item.
+    """
+    return DigestItem(
+        item_dict["body"],
+        item_dict["username"],
+        date_parse(item_dict["updated_at"])
+    )
 
 
 def generate_digest_content(users_by_id, from_dt, to_dt):
@@ -164,4 +163,4 @@ def generate_digest_content(users_by_id, from_dt, to_dt):
         logger.info('calling comments service to pull digests for %d user(s)', len(users_by_id))
         resp = _http_post(api_url, headers=headers, data=data)
 
-    return Parser.parse(resp.json(), users_by_id)
+    return process_cs_response(resp.json(), users_by_id)
