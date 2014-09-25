@@ -61,7 +61,6 @@ def get_digest_subscribers():
         with dog_stats_api.timer('notifier.get_digest_subscribers.time'):
             data = _http_get(api_url, params=params, headers=_headers(), **_auth()).json()
         for result in data['results']:
-            del result['url']  # not used
             yield result
         if data['next'] is None:
             break

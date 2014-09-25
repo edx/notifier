@@ -1,9 +1,8 @@
 """
 """
-from django.conf import settings
 from django.test import TestCase
 from django.test.utils import override_settings
-from mock import MagicMock, Mock, patch
+from mock import patch
 
 from notifier.user import get_digest_subscribers, DIGEST_NOTIFICATION_PREFERENCE_KEY
 
@@ -17,7 +16,6 @@ mkresult = lambda n: {
     "id": n,
     "email": "email%d" % n, 
     "name": "name%d" % n, 
-    "url": "url%d" % n,
     "username": "user%d" % n,
     "preferences": {
         DIGEST_NOTIFICATION_PREFERENCE_KEY: "pref%d" % n,
