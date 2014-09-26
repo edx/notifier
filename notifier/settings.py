@@ -23,9 +23,6 @@ INSTALLED_APPS = (
 
 SERVICE_NAME = 'notifier'
 
-# django coverage
-TEST_RUNNER = 'django_coverage.coverage_runner.CoverageRunner'
-
 
 # Misc. Notifier Formatting
 
