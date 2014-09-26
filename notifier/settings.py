@@ -63,10 +63,6 @@ EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS')
 # email settings independent of backend
 EMAIL_REWRITE_RECIPIENT = os.getenv('EMAIL_REWRITE_RECIPIENT')
 
-# secret key for generating unsub tokens
-# this MUST be changed in production envs, and MUST match the LMS' secret key
-SECRET_KEY = os.getenv('SECRET_KEY', '85920908f28904ed733fe576320db18cabd7b6cd')
-
 # LMS links, images, etc
 LMS_URL_BASE = os.getenv('LMS_URL_BASE', 'http://localhost:8000')
 

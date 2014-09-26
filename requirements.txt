@@ -16,7 +16,6 @@ logilab-astng==0.24.3
 logilab-common==0.59.1
 mock==1.0.1
 pep8==1.4.6
-pycrypto>=2.6
 pylint==0.28.0
 python-dateutil==2.1
 pytz==2013b

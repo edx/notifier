@@ -14,7 +14,7 @@ from django.utils.html import strip_tags
 from django.utils.translation import ugettext as _, activate, deactivate
 from statsd import statsd
 
-from notifier.user import UsernameCipher, LANGUAGE_PREFERENCE_KEY
+from notifier.user import DIGEST_NOTIFICATION_PREFERENCE_KEY, LANGUAGE_PREFERENCE_KEY
 
 # maximum number of threads to display per course
 MAX_COURSE_THREADS = 30
@@ -147,14 +147,14 @@ def _get_thread_url(course_id, thread_id, commentable_id):
     return _get_course_url(course_id) + thread_path
 
 
-def _get_unsubscribe_url(username):
+def _get_unsubscribe_url(user):
     """
     Formatting helper.
 
     Generate a click-through url to unsubscribe a user from digest notifications,
-    using an encrypted token based on the username.
+    using the encrypted token contained in the user's preference.
     """
-    token = UsernameCipher.encrypt(username)
+    token = user["preferences"][DIGEST_NOTIFICATION_PREFERENCE_KEY]
     return '{}/notification_prefs/unsubscribe/{}/'.format(settings.LMS_URL_BASE, token)
 
 
@@ -227,7 +227,7 @@ def render_digest(user, digest, title, description):
         'course_names': _make_text_list([course.title for course in digest.courses]),
         'thread_count': sum(course.thread_count for course in digest.courses),
         'logo_image_url': settings.LOGO_IMAGE_URL,
-        'unsubscribe_url': _get_unsubscribe_url(user['username']),
+        'unsubscribe_url': _get_unsubscribe_url(user),
         'postal_address': settings.EMAIL_SENDER_POSTAL_ADDRESS,
         })
 
