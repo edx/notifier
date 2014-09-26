@@ -90,12 +90,14 @@ class Command(BaseCommand):
     def show_users(self, users):
         json.dump(list(users), self.stdout)
 
-    def show_content(self, users_by_id, from_dt, to_dt):
+    def show_content(self, users, from_dt, to_dt):
+        users_by_id = dict((str(u['id']), u) for u in users)
         all_content = generate_digest_content(users_by_id, from_dt, to_dt)
         # use django's encoder; builtin one doesn't handle datetime objects
         json.dump(list(all_content), self.stdout, cls=DigestJSONEncoder)
 
-    def show_rendered(self, fmt, users_by_id, from_dt, to_dt):
+    def show_rendered(self, fmt, users, from_dt, to_dt):
+        users_by_id = dict((str(u['id']), u) for u in users)
 
         def _fail(msg):
             logger.warning('could not show rendered %s: %s', fmt, msg)
@@ -130,8 +132,6 @@ class Command(BaseCommand):
             # get all the users subscribed to notifications
             users = get_digest_subscribers()  # generator
 
-        users_by_id = dict((str(u['id']), u) for u in users)
-
         if options.get('show_users'):
             self.show_users(users)
             return
@@ -146,11 +146,11 @@ class Command(BaseCommand):
             datetime.timedelta(minutes=options['minutes'])
 
         if options.get('show_content'):
-            self.show_content(users_by_id, from_datetime, to_datetime)
+            self.show_content(users, from_datetime, to_datetime)
             return
 
         if options.get('show_text'):
-            self.show_rendered('text', users_by_id, from_datetime, to_datetime)
+            self.show_rendered('text', users, from_datetime, to_datetime)
             return
 
         if options.get('show_html'):
