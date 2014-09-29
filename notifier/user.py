@@ -35,8 +35,11 @@ def _http_get(*a, **kw):
     except requests.exceptions.ConnectionError, e:
         _, msg, tb = sys.exc_info()
         raise UserServiceException, "request failed: {}".format(msg), tb
-    if response.status_code == 500:
-        raise UserServiceException, "HTTP Error 500: {}".format(response.reason)
+    if response.status_code != 200:
+        raise UserServiceException, "HTTP Error {}: {}".format(
+            response.status_code,
+            response.reason
+        )
     return response
 
 def get_digest_subscribers():
