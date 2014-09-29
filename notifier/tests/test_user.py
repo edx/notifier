@@ -1,9 +1,8 @@
 """
 """
-from django.conf import settings
 from django.test import TestCase
 from django.test.utils import override_settings
-from mock import MagicMock, Mock, patch
+from mock import patch
 
 from notifier.user import get_digest_subscribers, DIGEST_NOTIFICATION_PREFERENCE_KEY
 
@@ -17,11 +16,10 @@ mkresult = lambda n: {
     "id": n,
     "email": "email%d" % n, 
     "name": "name%d" % n, 
-    "url": "url%d" % n,
-    "username": "user%d" % n,
     "preferences": {
         DIGEST_NOTIFICATION_PREFERENCE_KEY: "pref%d" % n,
     },
+    "course_info": {},
 }
 mkexpected = lambda d: dict([(key, val) for (key, val) in d.items() if key != "url"])
 
@@ -32,7 +30,7 @@ class UserTestCase(TestCase):
     """
 
     def setUp(self):
-        self.expected_api_url = "test_server_url/user_api/v1/preferences/{key}/users/".format(key=DIGEST_NOTIFICATION_PREFERENCE_KEY)
+        self.expected_api_url = "test_server_url/notifier_api/v1/users/"
         self.expected_params = {"page_size":3, "page":1}
         self.expected_headers = {'X-EDX-API-Key': TEST_API_KEY}
 

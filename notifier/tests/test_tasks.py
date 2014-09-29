@@ -4,8 +4,6 @@ from contextlib import nested
 import datetime
 import json
 from os.path import dirname, join
-import sys
-import traceback
 
 from boto.ses.exceptions import SESMaxSendingRateExceededError
 from django.conf import settings
@@ -15,8 +13,9 @@ from django.test.utils import override_settings
 from mock import patch, Mock
 
 from notifier.tasks import generate_and_send_digests, do_forums_digests
-from notifier.pull import Parser
+from notifier.pull import process_cs_response
 from notifier.user import UserServiceException, DIGEST_NOTIFICATION_PREFERENCE_KEY
+from .utils import make_user_info
 
 
 # fixture data helper
@@ -24,10 +23,12 @@ usern = lambda n: {
     'name': 'user%d' % n,
     'id': n,
     'email': 'user%d@dummy.edu' %n,
-    'username': 'user%d' % n,
     'preferences': {
         DIGEST_NOTIFICATION_PREFERENCE_KEY: 'pref%d' % n,
     },
+    'course_info': {
+
+    }
 }
 
 
@@ -67,12 +68,17 @@ class TasksTestCase(TestCase):
                     self.assertTrue(item.body in actual_text)
                     self.assertTrue(item.body in actual_html)
 
+    def _process_cs_response_with_user_info(self, data):
+        mock_user_info = make_user_info(data)
+        return process_cs_response(data, mock_user_info)
+
     def test_generate_and_send_digests(self):
         """
         """
         data = json.load(
             open(join(dirname(__file__), 'cs_notifications.result.json')))
-        user_id, digest = Parser.parse(data).next()
+
+        user_id, digest = self._process_cs_response_with_user_info(data).next()
         user = usern(10)
         with patch('notifier.tasks.generate_digest_content', return_value=[(user_id, digest)]) as p:
 
@@ -97,8 +103,10 @@ class TasksTestCase(TestCase):
         data = json.load(
             open(join(dirname(__file__), 'cs_notifications.result.json')))
 
-        with patch('notifier.tasks.generate_digest_content', return_value=Parser.parse(data)) as p:
-
+        with patch(
+            'notifier.tasks.generate_digest_content',
+            return_value=self._process_cs_response_with_user_info(data)
+        ):
             # execute task
             task_result = generate_and_send_digests.delay(
                 (usern(n) for n in xrange(2, 11)), datetime.datetime.now(), datetime.datetime.now())
@@ -118,8 +126,10 @@ class TasksTestCase(TestCase):
         data = json.load(
             open(join(dirname(__file__), 'cs_notifications.result.json')))
 
-        with patch('notifier.tasks.generate_digest_content', return_value=list(Parser.parse(data))) as p:
-
+        with patch(
+            'notifier.tasks.generate_digest_content',
+            return_value=list(self._process_cs_response_with_user_info(data))
+        ):
             # setting this here because override_settings doesn't seem to
             # work on celery task configuration decorators
             expected_num_tries = 1 + settings.FORUM_DIGEST_TASK_MAX_RETRIES
@@ -129,7 +139,7 @@ class TasksTestCase(TestCase):
                 # execute task - should fail, retry twice and still fail, then
                 # give up
                 try:
-                    task_result = generate_and_send_digests.delay(
+                    generate_and_send_digests.delay(
                         [usern(n) for n in xrange(2, 11)], datetime.datetime.now(), datetime.datetime.now())
                 except SESMaxSendingRateExceededError as e:
                     self.assertEqual(
