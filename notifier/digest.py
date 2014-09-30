@@ -15,7 +15,6 @@ from statsd import statsd
 from opaque_keys.edx.keys import CourseKey
 
 from notifier.user import DIGEST_NOTIFICATION_PREFERENCE_KEY, LANGUAGE_PREFERENCE_KEY
-from opaque_keys import InvalidKeyError
 
 # maximum number of threads to display per course
 MAX_COURSE_THREADS = 30
@@ -121,11 +120,7 @@ def _get_course_title(course_id):
     >>> _get_course_title("MITx/6.002x/2012_Fall")
     '6.002x MITx'
     """
-    try:
-        course_key = CourseKey.from_string(course_id)
-    except InvalidKeyError:
-        # dhm: I think this is only used by test code
-        return course_id
+    course_key = CourseKey.from_string(course_id)
     return '{0.course} {0.org}'.format(course_key)
 
 
