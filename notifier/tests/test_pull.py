@@ -39,8 +39,8 @@ class DigestTestCase(TestCase):
             "username": "user_%s" % v,
             "updated_at": (
                 datetime.datetime(2013, 1, 1) + datetime.timedelta(
-                    days=random.randint(0,365),
-                    seconds=random.randint(0,86399)
+                    days=random.randint(0, 365),
+                    seconds=random.randint(0, 86399)
                 )).isoformat()
         }
 
@@ -65,7 +65,9 @@ class DigestTestCase(TestCase):
         Returns a mock digest for the given courses as would be returned by the comments service.
         Generates random course ids.
         """
-        return dict(('id-%s' % random.random(), course) for course in courses)
+        # This test file uses both currently known forms of course id strings to ensure
+        # that notifiers makes no assumptions about course key types. org/course/run is one
+        return dict(('org/id-%s/run' % random.random(), course) for course in courses)
 
     @staticmethod
     def _payload(digests=[]):
@@ -85,7 +87,7 @@ class CommentsServiceResponseTestCase(DigestTestCase):
         self.assertEqual(parsed_item.body, _trunc(raw_item["body"], THREAD_ITEM_MAXLEN))
         self.assertEqual(parsed_item.author, raw_item["username"])
         self.assertEqual(parsed_item.dt, date_parse(raw_item["updated_at"]))
-       
+
     def _find_raw_item(self, parsed_item, raw_items):
         for raw_item in raw_items:
             try:
@@ -134,7 +136,7 @@ class CommentsServiceResponseTestCase(DigestTestCase):
         # each parsed course is a correct parsing of some raw course
         for parsed_course in parsed_digest.courses:
             self.assertIsNotNone(self._find_raw_course(parsed_course, raw_digest))
-        # parsed courses occur sorted by title, case-insensitively 
+        # parsed courses occur sorted by title, case-insensitively
         lower_titles = [parsed_course.title.lower() for parsed_course in parsed_digest.courses]
         self.assertEqual(lower_titles, sorted(lower_titles))
 
@@ -153,25 +155,45 @@ class CommentsServiceResponseTestCase(DigestTestCase):
     def test_thread_simple(self):
         t = self._thread("t", [self._item("a"), self._item("b"), self._item("c")])
         self._check_thread(
-            "some_thread_id", "some_course_id", t, _build_digest_thread('some_thread_id', 'some_course_id', t)
+            "some_thread_id", "some/course/id", t, _build_digest_thread('some_thread_id', 'some/course/id', t)
         )
-        
+
     def test_course_simple(self):
         c = self._course([
-               self._thread("t0", [self._item("a"), self._item("b"), self._item("c")]),
-               self._thread("t1", [self._item("d"), self._item("e"), self._item("f")]),
-               self._thread("t2", [self._item("g"), self._item("h"), self._item("i")]),
-            ])
+            self._thread("t0", [self._item("a"), self._item("b"), self._item("c")]),
+            self._thread("t1", [self._item("d"), self._item("e"), self._item("f")]),
+            self._thread("t2", [self._item("g"), self._item("h"), self._item("i")]),
+        ])
         self._check_course(
-            "some_course_id",
+            "some/course/id",
             c,
             _build_digest_course(
-                "some_course_id", c, {"see_all_cohorts": False, "cohort_id": None}
+                "some/course/id", c, {"see_all_cohorts": False, "cohort_id": None}
             )
         )
-        
+
     def test_digest_simple(self):
         d = self._digest([
+            self._course([
+                self._thread("t00", [self._item("a"), self._item("b"), self._item("c")]),
+                self._thread("t01", [self._item("d"), self._item("e"), self._item("f")]),
+                self._thread("t02", [self._item("g"), self._item("h"), self._item("i")]),
+            ]),
+            self._course([
+                self._thread("t10", [self._item("j"), self._item("k"), self._item("l")]),
+                self._thread("t11", [self._item("m"), self._item("n"), self._item("o")]),
+                self._thread("t12", [self._item("p"), self._item("q"), self._item("r")]),
+            ]),
+        ])
+        self._check_digest(
+            "some_user_id",
+            d,
+            _build_digest(d, {"course_info": {"some/course/id": {"see_all_cohorts": False, "cohort_id": None}}})
+        )
+
+    def test_parse(self):
+        p = self._payload([
+            self._digest([
                 self._course([
                    self._thread("t00", [self._item("a"), self._item("b"), self._item("c")]),
                    self._thread("t01", [self._item("d"), self._item("e"), self._item("f")]),
@@ -182,42 +204,22 @@ class CommentsServiceResponseTestCase(DigestTestCase):
                    self._thread("t11", [self._item("m"), self._item("n"), self._item("o")]),
                    self._thread("t12", [self._item("p"), self._item("q"), self._item("r")]),
                 ]),
-            ])
-        self._check_digest(
-            "some_user_id",
-            d,
-            _build_digest(d, {"course_info": {"some_course_id": {"see_all_cohorts": False, "cohort_id": None}}})
-        )
-
-    def test_parse(self):
-        p = self._payload([
-                self._digest([
-                    self._course([
-                       self._thread("t00", [self._item("a"), self._item("b"), self._item("c")]),
-                       self._thread("t01", [self._item("d"), self._item("e"), self._item("f")]),
-                       self._thread("t02", [self._item("g"), self._item("h"), self._item("i")]),
-                    ]),
-                    self._course([
-                       self._thread("t10", [self._item("j"), self._item("k"), self._item("l")]),
-                       self._thread("t11", [self._item("m"), self._item("n"), self._item("o")]),
-                       self._thread("t12", [self._item("p"), self._item("q"), self._item("r")]),
-                    ]),
+            ]),
+            self._digest([
+                self._course([
+                   self._thread("t20", [self._item("A"), self._item("B"), self._item("C")]),
+                   self._thread("t21", [self._item("D"), self._item("E"), self._item("F")]),
+                   self._thread("t22", [self._item("G"), self._item("H"), self._item("I")]),
                 ]),
-                self._digest([
-                    self._course([
-                       self._thread("t20", [self._item("A"), self._item("B"), self._item("C")]),
-                       self._thread("t21", [self._item("D"), self._item("E"), self._item("F")]),
-                       self._thread("t22", [self._item("G"), self._item("H"), self._item("I")]),
-                    ]),
-                    self._course([
-                       self._thread("t30", [self._item("J"), self._item("K"), self._item("L")]),
-                       self._thread("t31", [self._item("M"), self._item("N"), self._item("O")]),
-                       self._thread("t32", [self._item("P"), self._item("Q"), self._item("R")]),
-                    ]),
+                self._course([
+                   self._thread("t30", [self._item("J"), self._item("K"), self._item("L")]),
+                   self._thread("t31", [self._item("M"), self._item("N"), self._item("O")]),
+                   self._thread("t32", [self._item("P"), self._item("Q"), self._item("R")]),
                 ]),
-            ])
+            ]),
+        ])
         digest_count = 0
-        for user_id, parsed_digest in process_cs_response(p, make_user_info(p)):
+        for __, parsed_digest in process_cs_response(p, make_user_info(p)):
             self.assertIsNotNone(self._find_raw_digest(parsed_digest, p))
             digest_count += 1
         self.assertEqual(digest_count, len(p))
@@ -246,7 +248,7 @@ class GenerateDigestContentTestCase(DigestTestCase):
             }
             expected_post_data = {
                 'user_ids': 'a,b,c',
-                'from': '2013-01-01 00:00:00', # TODO tz offset
+                'from': '2013-01-01 00:00:00',  # TODO tz offset
                 'to': '2013-01-02 00:00:00'
             }
             p.assert_called_once_with(expected_api_url, headers=expected_headers, data=expected_post_data)            
@@ -289,36 +291,38 @@ class GenerateDigestContentTestCase(DigestTestCase):
         users_by_id = {
             "moderator": {
                 "course_info": {
-                    "cohorted-course": {"see_all_cohorts": True, "cohort_id": None},
-                    "non-cohorted-course": {"see_all_cohorts": True, "cohort_id": None},
+                    # This test file uses both currently known forms of course id strings to ensure
+                    # that notifiers makes no assumptions about course key types. course-v1 is one
+                    "course-v1:org+cohorted-course+run": {"see_all_cohorts": True, "cohort_id": None},
+                    "course-v1:org+non-cohorted-course+run": {"see_all_cohorts": True, "cohort_id": None},
                 },
-                "expected_courses": ["cohorted-course", "non-cohorted-course"],
+                "expected_courses": ["course-v1:org+cohorted-course+run", "course-v1:org+non-cohorted-course+run"],
                 "expected_threads": [
                     "group1-t01", "group2-t02", "all-groups-t03", "no-group-t11", "old-group-t12"
                 ],
             },
             "group1_user": {
                 "course_info": {
-                    "cohorted-course": {"see_all_cohorts": False, "cohort_id": gid_1},
-                    "non-cohorted-course": {"see_all_cohorts": True, "cohort_id": None},
+                    "course-v1:org+cohorted-course+run": {"see_all_cohorts": False, "cohort_id": gid_1},
+                    "course-v1:org+non-cohorted-course+run": {"see_all_cohorts": True, "cohort_id": None},
                 },
-                "expected_courses": ["cohorted-course", "non-cohorted-course"],
+                "expected_courses": ["course-v1:org+cohorted-course+run", "course-v1:org+non-cohorted-course+run"],
                 "expected_threads": ["group1-t01", "all-groups-t03", "no-group-t11", "old-group-t12"],
             },
             "group2_user": {
                 "course_info": {
-                    "cohorted-course": {"see_all_cohorts": False, "cohort_id": gid_2},
-                    "non-cohorted-course": {"see_all_cohorts": True, "cohort_id": gid_nothreads},
+                    "course-v1:org+cohorted-course+run": {"see_all_cohorts": False, "cohort_id": gid_2},
+                    "course-v1:org+non-cohorted-course+run": {"see_all_cohorts": True, "cohort_id": gid_nothreads},
                 },
-                "expected_courses": ["cohorted-course", "non-cohorted-course"],
+                "expected_courses": ["course-v1:org+cohorted-course+run", "course-v1:org+non-cohorted-course+run"],
                 "expected_threads": ["group2-t02", "all-groups-t03", "no-group-t11", "old-group-t12"],
             },
             "unassigned_user": {
                 "course_info": {
-                    "cohorted-course": {"see_all_cohorts": False, "cohort_id": None},
-                    "non-cohorted-course": {"see_all_cohorts": True, "cohort_id": None},
+                    "course-v1:org+cohorted-course+run": {"see_all_cohorts": False, "cohort_id": None},
+                    "course-v1:org+non-cohorted-course+run": {"see_all_cohorts": True, "cohort_id": None},
                 },
-                "expected_courses": ["cohorted-course", "non-cohorted-course"],
+                "expected_courses": ["course-v1:org+cohorted-course+run", "course-v1:org+non-cohorted-course+run"],
                 "expected_threads": ["all-groups-t03", "no-group-t11", "old-group-t12"],
             },
             "unenrolled_user": {  # should receive no digest because not enrolled in any courses
@@ -328,15 +332,15 @@ class GenerateDigestContentTestCase(DigestTestCase):
             },
             "one_course_empty_user": {
                 "course_info": {
-                    "cohorted-course": {"see_all_cohorts": False, "cohort_id": gid_2},
-                    "all-cohorted-course": {"see_all_cohorts": False, "cohort_id": gid_nothreads},
+                    "course-v1:org+cohorted-course+run": {"see_all_cohorts": False, "cohort_id": gid_2},
+                    "course-v1:all+cohorted-course+run": {"see_all_cohorts": False, "cohort_id": gid_nothreads},
                 },
-                "expected_courses": ["cohorted-course"],
+                "expected_courses": ["course-v1:org+cohorted-course+run"],
                 "expected_threads": ["group2-t02", "all-groups-t03"],
             },
             "all_courses_empty_user": {  # should not get any digest, because group filter kicks in
                 "course_info": {
-                    "all-cohorted-course": {"see_all_cohorts": False, "cohort_id": gid_nothreads},
+                    "course-v1:all+cohorted-course+run": {"see_all_cohorts": False, "cohort_id": gid_nothreads},
                 },
                 "expected_courses": [],
                 "expected_threads": [],
@@ -347,16 +351,16 @@ class GenerateDigestContentTestCase(DigestTestCase):
         # Create a mock payload with digest information as would be returned by the comments service.
         payload = {
             user_id: {
-                "cohorted-course": self._course([
+                "course-v1:org+cohorted-course+run": self._course([
                     self._thread("group1-t01", [self._item("a1"), self._item("b1"), self._item("c1")], gid_1),
                     self._thread("group2-t02", [self._item("a2"), self._item("b2"), self._item("c2")], gid_2),
                     self._thread("all-groups-t03", [self._item("a3"), self._item("b3"), self._item("c3")], None),
                 ]),
-                "non-cohorted-course": self._course([
+                "course-v1:org+non-cohorted-course+run": self._course([
                     self._thread("no-group-t11", [self._item("a3"), self._item("b3"), self._item("c3")], None),
                     self._thread("old-group-t12", [self._item("a3"), self._item("b3"), self._item("c3")], gid_nousers),
                 ]),
-                "all-cohorted-course": self._course([
+                "course-v1:all+cohorted-course+run": self._course([
                     self._thread("groupX-t01", [self._item("x")], gid_1),
                     self._thread("groupX-t01", [self._item("x")], gid_nousers),
                 ]),
