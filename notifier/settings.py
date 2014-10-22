@@ -86,8 +86,8 @@ import djcelery
 djcelery.setup_loader()
 BROKER_URL = os.getenv('BROKER_URL', 'django://')
 
-# limit the frequency with which the forum digest task may run.
-FORUM_DIGEST_TASK_RATE_LIMIT = "6/m" # no more than every 10 seconds
+# limit the frequency at which the forum digest celery task may be run.
+FORUM_DIGEST_TASK_RATE_LIMIT = os.getenv('FORUM_DIGEST_TASK_RATE_LIMIT', '6/m')
 # limit the size of user batches (cs service pulls / emails sent) per-task 
 FORUM_DIGEST_TASK_BATCH_SIZE = int(os.getenv('FORUM_DIGEST_TASK_BATCH_SIZE', 5))
 # limit the number of times an individual task will be retried
