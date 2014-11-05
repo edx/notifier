@@ -13,7 +13,7 @@ from django.test.utils import override_settings
 from mock import patch, Mock
 
 from notifier.tasks import generate_and_send_digests, do_forums_digests
-from notifier.pull import process_cs_response
+from notifier.pull import process_cs_response, CommentsServiceException
 from notifier.user import UserServiceException, DIGEST_NOTIFICATION_PREFERENCE_KEY
 from .utils import make_user_info
 
@@ -120,7 +120,7 @@ class TasksTestCase(TestCase):
             for message in djmail.outbox:
                 self.assertEqual(message.to, ['rewritten-address@domain.org'])
 
-    def test_generate_and_send_digests_retry_limit(self):
+    def test_generate_and_send_digests_retry_ses(self):
         """
         """
         data = json.load(
@@ -148,6 +148,25 @@ class TasksTestCase(TestCase):
                 else:
                     # should have raised
                     self.fail('task did not retry twice before giving up')
+
+    def test_generate_and_send_digests_retry_cs(self):
+        """
+        """
+        with patch(
+            'notifier.tasks.generate_digest_content',
+            side_effect=CommentsServiceException('timed out')
+        ) as mock_cs_call:
+            # setting this here because override_settings doesn't seem to
+            # work on celery task configuration decorators
+            expected_num_tries = 1 + settings.FORUM_DIGEST_TASK_MAX_RETRIES
+            try:
+                generate_and_send_digests.delay(
+                    [usern(n) for n in xrange(2, 11)], datetime.datetime.now(), datetime.datetime.now())
+            except CommentsServiceException as e:
+                self.assertEqual(mock_cs_call.call_count, expected_num_tries)
+            else:
+                # should have raised
+                self.fail('task did not retry twice before giving up')
 
     @override_settings(FORUM_DIGEST_TASK_BATCH_SIZE=10)
     def test_do_forums_digests(self):

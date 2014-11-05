@@ -12,7 +12,7 @@ from django.core.mail import EmailMultiAlternatives
 
 from notifier.connection_wrapper import get_connection
 from notifier.digest import render_digest
-from notifier.pull import generate_digest_content
+from notifier.pull import generate_digest_content, CommentsServiceException
 from notifier.user import get_digest_subscribers, UserServiceException
 
 logger = logging.getLogger(__name__)
@@ -31,39 +31,33 @@ def generate_and_send_digests(users, from_dt, to_dt):
     of the time window for which to generate a digest.
     """
     users_by_id = dict((str(u['id']), u) for u in users)
-    with closing(get_connection()) as cx:
-        msgs = []
-        for user_id, digest in generate_digest_content(users_by_id, from_dt, to_dt):
-            user = users_by_id[user_id]
-            # format the digest
-            text, html = render_digest(
-                user, digest, settings.FORUM_DIGEST_EMAIL_TITLE, settings.FORUM_DIGEST_EMAIL_DESCRIPTION)
-            # send the message through our mailer
-            msg = EmailMultiAlternatives(
-                settings.FORUM_DIGEST_EMAIL_SUBJECT,
-                text,
-                settings.FORUM_DIGEST_EMAIL_SENDER,
-                [user['email']]
-            )
-            msg.attach_alternative(html, "text/html")
-            msgs.append(msg)
-        if not msgs:
-            return
-        try:
+    msgs = []
+    try:
+        with closing(get_connection()) as cx:
+            for user_id, digest in generate_digest_content(users_by_id, from_dt, to_dt):
+                user = users_by_id[user_id]
+                # format the digest
+                text, html = render_digest(
+                    user, digest, settings.FORUM_DIGEST_EMAIL_TITLE, settings.FORUM_DIGEST_EMAIL_DESCRIPTION)
+                # send the message through our mailer
+                msg = EmailMultiAlternatives(
+                    settings.FORUM_DIGEST_EMAIL_SUBJECT,
+                    text,
+                    settings.FORUM_DIGEST_EMAIL_SENDER,
+                    [user['email']]
+                )
+                msg.attach_alternative(html, "text/html")
+                msgs.append(msg)
+            if not msgs:
+                return
             cx.send_messages(msgs)
-        except SESMaxSendingRateExceededError as e:
-            # we've tripped the per-second send rate limit.  we generally
-            # rely  on the django_ses auto throttle to prevent this,
-            # but in case we creep over, we can re-queue and re-try this task
-            # - if and only if none of the messages in our batch were
-            # sent yet.
-            # this implementation is also non-ideal in that the data will be
-            # fetched from the comments service again in the event of a retry.
-            if not any((getattr(msg, 'extra_headers', {}).get('status') == 200 for msg in msgs)):
-                raise generate_and_send_digests.retry(exc=e)
-            else:
-                # raise right away, since we don't support partial retry
-                raise
+    except (CommentsServiceException, SESMaxSendingRateExceededError) as e:
+        # only retry if no messages were successfully sent yet.
+        if not any((getattr(msg, 'extra_headers', {}).get('status') == 200 for msg in msgs)):
+            raise generate_and_send_digests.retry(exc=e)
+        else:
+            # raise right away, since we don't support partial retry
+            raise
 
 def _time_slice(minutes, now=None):
     """
