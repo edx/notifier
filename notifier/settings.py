@@ -23,7 +23,6 @@ INSTALLED_APPS = (
 
 SERVICE_NAME = 'notifier'
 
-
 # Misc. Notifier Formatting
 
 FORUM_DIGEST_EMAIL_SENDER = os.getenv('FORUM_DIGEST_EMAIL_SENDER', 'notifications@example.org')
@@ -159,7 +158,8 @@ if LOG_FILE:
     })
     LOGGING['loggers']['']['handlers'].append('file')
 
-CELERY_TIMEZONE = 'UTC'
+TIME_ZONE = 'UTC'  # what task workers see
+CELERY_TIMEZONE = 'UTC'  # what the main celery process sees 
 
 # set up schedule for forum digest job
 if FORUM_DIGEST_TASK_INTERVAL==1440:
