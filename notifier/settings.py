@@ -194,4 +194,4 @@ USE_L10N = True
 LOCALE_PATHS = (os.path.join(os.path.dirname(os.path.dirname(__file__)), 'locale'),)
 
 # Parameterize digest logo image url
-LOGO_IMAGE_URL = os.getenv('LOGO_IMAGE_URL', "{}/static/images/header-logo.png".format(LMS_URL_BASE))
+LOGO_IMAGE_URL = os.getenv('LOGO_IMAGE_URL', "{}/static/images/edx-theme/edx-header-logo.png".format(LMS_URL_BASE))
