@@ -188,7 +188,14 @@ CELERYD_PREFETCH_MULTIPLIER = 1
 LANGUAGE_CODE = os.getenv('NOTIFIER_LANGUAGE', 'en')
 LANGUAGES = (
     ("en", "English"),
+    ("ar", "Arabic"),
+    ("es_419", "Spanish (Latin America)"),
     ("fr", "French"),
+    ("he", "Hebrew"),
+    ("hi", "Hindi"),
+    ("pt_BR", "Portuguese (Brazil)"),
+    ("ru", "Russian"),
+    ("zh_CN", "Chinese (Simplified)"),
 )
 USE_L10N = True
 LOCALE_PATHS = (os.path.join(os.path.dirname(os.path.dirname(__file__)), 'locale'),)
