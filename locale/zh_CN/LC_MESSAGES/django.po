@@ -1,0 +1,93 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# 
+# Translators:
+# Harry Li <harry75369@gmail.com>, 2014
+# jiangnan.hugo <jiangnan.hugo@gmail.com>, 2014
+# pku9104038 <pku9104038@hotmail.com>, 2014
+msgid ""
+msgstr ""
+"Project-Id-Version: edx-platform\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2014-03-12 13:42-0500\n"
+"PO-Revision-Date: 2014-04-24 12:34+0000\n"
+"Last-Translator: pku9104038 <pku9104038@hotmail.com>\n"
+"Language-Team: Chinese (China) (http://www.transifex.com/open-edx/edx-platform/language/zh_CN/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: zh_CN\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#. Translators: This string separates two items in a pair (e.g.
+#. "Foo and Bar"); note that this includes any necessary whitespace to
+#. accommodate languages that do not use whitespace in such a pair construct.
+#: notifier/digest.py:89
+msgid " and "
+msgstr "与"
+
+#. Translators: This string separates items in a list (e.g.
+#. "Foo, Bar, Baz, and Quux"); note that this includes any necessary
+#. whitespace to accommodate languages that do not use whitespace in
+#. such a list construct.
+#: notifier/digest.py:94
+msgid ", "
+msgstr "，"
+
+#. Translators: This string separates the final two items in a list (e.g.
+#. "Foo, Bar and Baz"); note that this includes any necessary whitespace to
+#. accommodate languages that do not use whitespace in such a list construct.
+#: notifier/digest.py:98
+msgid ", and "
+msgstr "，和"
+
+#: notifier/templates/digest-email.html:72
+#: notifier/templates/digest-email.txt:8
+#, python-format
+msgid "Hi %(name)s,"
+msgstr "%(name)s您好，"
+
+#: notifier/templates/digest-email.html:74
+#: notifier/templates/digest-email.txt:10
+#, python-format
+msgid ""
+"You have %(thread_count)s discussion thread with updates in "
+"%(course_names)s. The most recent highlights are shown below. As a reminder,"
+" you can turn off all discussion digests from any course's Discussion Home "
+"page."
+msgid_plural ""
+"You have %(thread_count)s discussion threads with updates in "
+"%(course_names)s. The most recent highlights are shown below. As a reminder,"
+" you can turn off all discussion digests from any course's Discussion Home "
+"page."
+msgstr[0] "您在%(course_names)s课程中有%(thread_count)s个讨论有更新，最新的讨论要点如下所示。温馨提醒，您可以随时在课程的讨论主页关闭所有的讨论摘要。"
+
+#: notifier/templates/digest-email.html:103
+#, python-format
+msgid ""
+"<span %(author_span_attrs)s>%(author)s: </span><span "
+"%(datetime_span_attrs)s>on %(datetime)s UTC</span>"
+msgstr "<span %(author_span_attrs)s>%(author)s：</span><span %(datetime_span_attrs)s> %(datetime)s 国际标准时间</span>"
+
+#: notifier/templates/digest-email.html:119
+#, python-format
+msgid ""
+"If you would like to stop receiving these updates, you can turn off all "
+"Course Discussion digests from any course's Discussion Home page. You can "
+"also <a %(a_attrs)s>quickly turn off these notifications from this "
+"email.</a>"
+msgstr "如果您不想收到这些更新，您可以在课程的讨论主页里关掉讨论摘要。您也可以<a %(a_attrs)s>通过本邮件快速关闭通知功能。</a>"
+
+#: notifier/templates/digest-email.txt:20
+#, python-format
+msgid "%(author)s: on %(datetime)s UTC"
+msgstr "%(author)s：%(datetime)s 国际标准时间"
+
+#: notifier/templates/digest-email.txt:28
+#, python-format
+msgid ""
+"If you would like to stop receiving these updates, you can turn off all "
+"Course Discussion digests from any course's Discussion Home page. You can "
+"also quickly turn off these notifications by going to %(unsubscribe_url)s."
+msgstr "如果您不想收到这些更新，您可以在课程的讨论主页里关掉讨论摘要。您也可以访问%(unsubscribe_url)s来快速关闭通知功能。"

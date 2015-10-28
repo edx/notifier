@@ -1,0 +1,94 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# 
+# Translators:
+# javiercencig <javier@jecnet.com.br>, 2014
+# RenataBarboza, 2014
+# Renata Barboza-Murray, 2014
+msgid ""
+msgstr ""
+"Project-Id-Version: edx-platform\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2014-03-12 13:42-0500\n"
+"PO-Revision-Date: 2014-06-14 22:00+0000\n"
+"Last-Translator: javiercencig <javier@jecnet.com.br>\n"
+"Language-Team: Portuguese (Brazil) (http://www.transifex.com/open-edx/edx-platform/language/pt_BR/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: pt_BR\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#. Translators: This string separates two items in a pair (e.g.
+#. "Foo and Bar"); note that this includes any necessary whitespace to
+#. accommodate languages that do not use whitespace in such a pair construct.
+#: notifier/digest.py:89
+msgid " and "
+msgstr "e"
+
+#. Translators: This string separates items in a list (e.g.
+#. "Foo, Bar, Baz, and Quux"); note that this includes any necessary
+#. whitespace to accommodate languages that do not use whitespace in
+#. such a list construct.
+#: notifier/digest.py:94
+msgid ", "
+msgstr ","
+
+#. Translators: This string separates the final two items in a list (e.g.
+#. "Foo, Bar and Baz"); note that this includes any necessary whitespace to
+#. accommodate languages that do not use whitespace in such a list construct.
+#: notifier/digest.py:98
+msgid ", and "
+msgstr "e"
+
+#: notifier/templates/digest-email.html:72
+#: notifier/templates/digest-email.txt:8
+#, python-format
+msgid "Hi %(name)s,"
+msgstr "Oi, %(name)s,"
+
+#: notifier/templates/digest-email.html:74
+#: notifier/templates/digest-email.txt:10
+#, python-format
+msgid ""
+"You have %(thread_count)s discussion thread with updates in "
+"%(course_names)s. The most recent highlights are shown below. As a reminder,"
+" you can turn off all discussion digests from any course's Discussion Home "
+"page."
+msgid_plural ""
+"You have %(thread_count)s discussion threads with updates in "
+"%(course_names)s. The most recent highlights are shown below. As a reminder,"
+" you can turn off all discussion digests from any course's Discussion Home "
+"page."
+msgstr[0] "Há %(thread_count)s tópico de discussão com atualizações no curso %(course_names)s. Os destaques mais recentes são mostrados abaixo. Lembre-se que é possível desativar todos os resumos das discussões na página inicial de discussões do curso."
+msgstr[1] "Há %(thread_count)s tópicos de discussão com atualizações nos cursos %(course_names)s. Os destaques mais recentes são mostrados abaixo. Lembre-se que é possível desativar todos os resumos das discussões na página inicial de discussão do curso."
+
+#: notifier/templates/digest-email.html:103
+#, python-format
+msgid ""
+"<span %(author_span_attrs)s>%(author)s: </span><span "
+"%(datetime_span_attrs)s>on %(datetime)s UTC</span>"
+msgstr "<span %(author_span_attrs)s>%(author)s: </span><span %(datetime_span_attrs)s>em %(datetime)s UTC</span>"
+
+#: notifier/templates/digest-email.html:119
+#, python-format
+msgid ""
+"If you would like to stop receiving these updates, you can turn off all "
+"Course Discussion digests from any course's Discussion Home page. You can "
+"also <a %(a_attrs)s>quickly turn off these notifications from this "
+"email.</a>"
+msgstr "Caso não deseje receber estas atualizações, é possível desativar todos os resumos da discussão do curso na página inicial do fórum do curso. É possível também <a %(a_attrs)s>desativar estas notificações a partir deste e-mail.</a>"
+
+#: notifier/templates/digest-email.txt:20
+#, python-format
+msgid "%(author)s: on %(datetime)s UTC"
+msgstr "%(author)s: em %(datetime)s UTC"
+
+#: notifier/templates/digest-email.txt:28
+#, python-format
+msgid ""
+"If you would like to stop receiving these updates, you can turn off all "
+"Course Discussion digests from any course's Discussion Home page. You can "
+"also quickly turn off these notifications by going to %(unsubscribe_url)s."
+msgstr "Caso não deseje receber estas atualizações, é possível desativar todos os resumos da discussão do curso na página inicial do fórum do curso. É possível também desativar estas notificações acessando %(unsubscribe_url)s."
