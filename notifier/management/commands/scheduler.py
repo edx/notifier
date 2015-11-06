@@ -7,7 +7,7 @@ from notifier.tasks import do_forums_digests
 # As it's name implies, when started, this Scheduler will block until forcibly stopped.
 sched = BlockingScheduler(standalone=True)
 
-@sched.cron_schedule(**settings.DIGEST_CRON_SCHEDULE)
+
 def digest_job():
     do_forums_digests.delay()
 
@@ -26,4 +26,5 @@ class Command(BaseCommand):
     """
 
     def handle(self, *args, **options):
+        sched.add_job(digest_job, 'cron', **settings.DIGEST_CRON_SCHEDULE)
         sched.start()
