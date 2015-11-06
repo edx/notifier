@@ -1,11 +1,11 @@
-from apscheduler.scheduler import Scheduler
+from apscheduler.schedulers.blocking import BlockingScheduler
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 
 from notifier.tasks import do_forums_digests
 
-# N.B. standalone=True means that sched.start() will block until forcibly stopped.
-sched = Scheduler(standalone=True)
+# As it's name implies, when started, this Scheduler will block until forcibly stopped.
+sched = BlockingScheduler(standalone=True)
 
 @sched.cron_schedule(**settings.DIGEST_CRON_SCHEDULE)
 def digest_job():
