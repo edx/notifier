@@ -4,6 +4,7 @@ Celery tasks for generating and sending digest emails.
 from contextlib import closing
 from datetime import datetime, timedelta
 import logging
+from requests import request
 
 from boto.ses.exceptions import SESMaxSendingRateExceededError
 import celery
@@ -48,9 +49,9 @@ def generate_and_send_digests(users, from_dt, to_dt):
                 )
                 msg.attach_alternative(html, "text/html")
                 msgs.append(msg)
-            if not msgs:
-                return
-            cx.send_messages(msgs)
+            if msgs:
+                cx.send_messages(msgs)
+            request("POST", settings.DEAD_MANS_SNITCH_URL)
     except (CommentsServiceException, SESMaxSendingRateExceededError) as e:
         # only retry if no messages were successfully sent yet.
         if not any((getattr(msg, 'extra_headers', {}).get('status') == 200 for msg in msgs)):
@@ -58,6 +59,8 @@ def generate_and_send_digests(users, from_dt, to_dt):
         else:
             # raise right away, since we don't support partial retry
             raise
+
+
 
 def _time_slice(minutes, now=None):
     """
