@@ -1,0 +1,13 @@
+version: '2'
+
+services:
+  edxops-notifier:
+    image: edxops/notifier:latest
+    container_name: notifier_testing
+    volumes:
+      - .:/edx/app/notifier/notifier
+    # The docker container produced from configuration.git does not currently
+    # run and expose a port for notifier. This means that we need to run some
+    # command that keeps the notifier container alive while we run tests on it.
+    # We have not yet standardized on an init replacement which could be used instead.
+    command: tail -f /dev/null
