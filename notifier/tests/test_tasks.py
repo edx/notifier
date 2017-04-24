@@ -4,6 +4,7 @@ from contextlib import nested
 import datetime
 import json
 from os.path import dirname, join
+import platform
 
 from boto.ses.exceptions import SESMaxSendingRateExceededError
 from django.conf import settings
@@ -12,6 +13,7 @@ from django.test import TestCase
 from django.test.utils import override_settings
 from mock import patch, Mock
 
+from notifier.models import ForumDigestTask
 from notifier.tasks import generate_and_send_digests, do_forums_digests
 from notifier.pull import process_cs_response, CommentsServiceException
 from notifier.user import UserServiceException, DIGEST_NOTIFICATION_PREFERENCE_KEY
@@ -204,3 +206,83 @@ class TasksTestCase(TestCase):
                 # should have raised
                 self.fail("task did not give up after exactly 3 attempts")
 
+
+    @override_settings(FORUM_DIGEST_TASK_BATCH_SIZE=10)
+    def test_do_forums_digests_creates_database_entry(self):
+        # patch _time_slice
+        # patch get_digest_subscribers
+        dt1 = datetime.datetime.utcnow()
+        dt2 = dt1 + datetime.timedelta(days=1)
+        with nested(
+            patch('notifier.tasks.get_digest_subscribers', return_value=(usern(n) for n in xrange(11))),
+            patch('notifier.tasks.generate_and_send_digests'),
+            patch('notifier.tasks._time_slice', return_value=(dt1, dt2))
+        ) as (p, t, ts):
+            self.assertEqual(ForumDigestTask.objects.count(), 0)
+            task_result = do_forums_digests.delay()
+            self.assertTrue(task_result.successful())
+            self.assertEqual(ForumDigestTask.objects.count(), 1)
+            model = ForumDigestTask.objects.all()[0]
+            self.assertEqual(model.from_dt, dt1)
+            self.assertEqual(model.to_dt, dt2)
+            self.assertEqual(model.node, platform.node())
+
+
+    @override_settings(FORUM_DIGEST_TASK_BATCH_SIZE=10)
+    def test_do_forums_digests_already_scheduled(self):
+        # patch _time_slice
+        # patch get_digest_subscribers
+        dt1 = datetime.datetime.utcnow()
+        dt2 = dt1 + datetime.timedelta(days=1)
+        dt3 = dt2 + datetime.timedelta(days=1)
+        # Scheduling the task for the first time sends the digests:
+        with nested(
+            patch('notifier.tasks.get_digest_subscribers', return_value=(usern(n) for n in xrange(10))),
+            patch('notifier.tasks._time_slice', return_value=(dt1, dt2)),
+            patch('notifier.tasks.generate_and_send_digests')
+        ) as (_gs, _ts, t):
+            task_result = do_forums_digests.delay()
+            self.assertTrue(task_result.successful())
+            self.assertEqual(t.delay.call_count, 1)
+        # Scheduling the task with the same time slice again does nothing:
+        with nested(
+            patch('notifier.tasks.get_digest_subscribers', return_value=(usern(n) for n in xrange(10))),
+            patch('notifier.tasks._time_slice', return_value=(dt1, dt2)),
+            patch('notifier.tasks.generate_and_send_digests')
+        ) as (_gs, _ts, t):
+            task_result = do_forums_digests.delay()
+            self.assertTrue(task_result.successful())
+            self.assertEqual(t.delay.call_count, 0)
+        # Scheduling the task with a different time slice sends the digests:
+        with nested(
+            patch('notifier.tasks.get_digest_subscribers', return_value=(usern(n) for n in xrange(10))),
+            patch('notifier.tasks._time_slice', return_value=(dt2, dt3)),
+            patch('notifier.tasks.generate_and_send_digests')
+        ) as (_gs, _ts, t):
+            task_result = do_forums_digests.delay()
+            self.assertTrue(task_result.successful())
+            self.assertEqual(t.delay.call_count, 1)
+
+
+    @override_settings(FORUM_DIGEST_TASK_GC_DAYS=5)
+    def test_do_forums_digests_creates_database_entry(self):
+        # Create some ForumDigestTask objects.
+        now = datetime.datetime.utcnow()
+        # Populate the database with four ForumDigestTask objects (1, 2, 7, and 10 days old).
+        for days in [1, 2, 7, 10]:
+            dt = now - datetime.timedelta(days=days)
+            from_dt = dt - datetime.timedelta(days=1)
+            task = ForumDigestTask.objects.create(from_dt=from_dt, to_dt=dt, node='some-node')
+            # Bypass field's auto_now_add by forcing the update via query manager.
+            ForumDigestTask.objects.filter(pk=task.pk).update(created=dt)
+        with nested(
+            patch('notifier.tasks.get_digest_subscribers', return_value=(usern(n) for n in xrange(11))),
+            patch('notifier.tasks.generate_and_send_digests'),
+        ) as (p, t):
+            # Two of the tasks that we created above are older than 5 days.
+            five_days_ago = now - datetime.timedelta(days=5)
+            self.assertEqual(ForumDigestTask.objects.filter(created__lt=five_days_ago).count(), 2)
+            task_result = do_forums_digests.delay()
+            self.assertTrue(task_result.successful())
+            # The two tasks that are older than 5 days should be removed.
+            self.assertEqual(ForumDigestTask.objects.filter(created__lt=five_days_ago).count(), 0)

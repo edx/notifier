@@ -4,6 +4,7 @@ Celery tasks for generating and sending digest emails.
 from contextlib import closing
 from datetime import datetime, timedelta
 import logging
+import platform
 import requests
 
 from boto.ses.exceptions import SESMaxSendingRateExceededError
@@ -13,6 +14,7 @@ from django.core.mail import EmailMultiAlternatives
 
 from notifier.connection_wrapper import get_connection
 from notifier.digest import render_digest
+from notifier.models import ForumDigestTask
 from notifier.pull import generate_digest_content, CommentsServiceException
 from notifier.user import get_digest_subscribers, UserServiceException
 
@@ -107,9 +109,13 @@ def _time_slice(minutes, now=None):
     dt_start = dt_end - timedelta(minutes=minutes)
     return (dt_start, dt_end)
 
-@celery.task(max_retries=settings.DAILY_TASK_MAX_RETRIES, default_retry_delay=settings.DAILY_TASK_RETRY_DELAY)
-def do_forums_digests():
-    
+@celery.task(
+    bind=True,
+    max_retries=settings.DAILY_TASK_MAX_RETRIES,
+    default_retry_delay=settings.DAILY_TASK_RETRY_DELAY
+)
+def do_forums_digests(self):
+
     def batch_digest_subscribers():
         batch = []
         for v in get_digest_subscribers():
@@ -122,7 +128,26 @@ def do_forums_digests():
 
     from_dt, to_dt = _time_slice(settings.FORUM_DIGEST_TASK_INTERVAL)
 
-    logger.info("Beginning forums digest task: from_dt=%s to_dt=%s", from_dt, to_dt)
+    # Remove old tasks from the database so that the table doesn't keep growing forever.
+    ForumDigestTask.prune_old_tasks(settings.FORUM_DIGEST_TASK_GC_DAYS)
+
+    if self.request.retries == 0:
+        task, created = ForumDigestTask.objects.get_or_create(
+            from_dt=from_dt,
+            to_dt=to_dt,
+            defaults={'node': platform.node()}
+        )
+        if created:
+            logger.info("Beginning forums digest task: from_dt=%s to_dt=%s", from_dt, to_dt)
+        else:
+            logger.info(
+                "Forums digest task already scheduled by '%s'; skipping: from_dt=%s to_dt=%s",
+                task.node, from_dt, to_dt
+            )
+            return
+    else:
+        logger.info("Retrying forums digest task: from_dt=%s to_dt=%s", from_dt, to_dt)
+
     try:
         for user_batch in batch_digest_subscribers():
             generate_and_send_digests.delay(user_batch, from_dt, to_dt)
