@@ -9,7 +9,6 @@ from django.core.management.base import BaseCommand, CommandError
 from django.core.serializers.json import DjangoJSONEncoder
 import json
 import logging
-from optparse import make_option
 import pytz
 import requests
 import sys
@@ -37,44 +36,53 @@ class Command(BaseCommand):
     """
     """
 
-    option_list = BaseCommand.option_list + (
-        make_option('--to_datetime',
-                    action='store',
-                    dest='to_datetime',
-                    default=None,
-                    help='datetime as of which to generate digest content, in ISO-8601 format (UTC).  Defaults to today at midnight (UTC).'),
-        make_option('--minutes',
-                    action='store',
-                    dest='minutes',
-                    type='int',
-                    default=1440,
-                    help='number of minutes up to TO_DATETIME for which to generate digest content.  Defaults to 1440 (one day).'),
-        make_option('--users',
-                    action='store',
-                    dest='users_str',
-                    default=None,
-                    help='send digests for the specified users only (regardless of opt-out settings!)'),
-        make_option('--show-content',
-                    action='store_true',
-                    dest='show_content',
-                    default=None,
-                    help='output the retrieved content only (don\'t send anything)'),
-        make_option('--show-users',
-                    action='store_true',
-                    dest='show_users',
-                    default=None,
-                    help='output the retrieved users only (don\'t fetch content or send anything)'),
-        make_option('--show-text',
-                    action='store_true',
-                    dest='show_text',
-                    default=None,
-                    help='output the rendered text body of the first user-digest generated, and exit (don\'t send anything)'),
-        make_option('--show-html',
-                    action='store_true',
-                    dest='show_html',
-                    default=None,
-                    help='output the rendered html body of the first user-digest generated, and exit (don\'t send anything)'),
-    )
+    def add_arguments(self, parser):
+
+        parser.add_argument('--to_datetime',
+                            action='store',
+                            dest='to_datetime',
+                            default=None,
+                            help='datetime as of which to generate digest content, in ISO-8601 format (UTC).' \
+                            'Defaults to today at midnight (UTC).')
+
+        parser.add_argument('--minutes',
+                            action='store',
+                            dest='minutes',
+                            type='int',
+                            default=1440,
+                            help='number of minutes up to TO_DATETIME for which to generate digest content.'\
+                            'Defaults to 1440 (one day).')
+
+        parser.add_argument('--users',
+                            action='store',
+                            dest='users_str',
+                            default=None,
+                            help='send digests for # TODO: he specified users only (regardless of opt-out settings!)')
+
+        parser.add_argument('--show-content',
+                            action='store_true',
+                            dest='show_content',
+                            default=None,
+                            help='output the retrieved content only (don\'t send anything)')
+
+        parser.add_argument('--show-users',
+                            action='store_true',
+                            dest='show_users',
+                            default=None,
+                            help='output the retrieved users only (don\'t fetch content or send anything)')
+        parser.add_argument('--show-text',
+                            action='store_true',
+                            dest='show_text',
+                            default=None,
+                            help='output the rendered text body of the first user-digest generated, and ' \
+                            'exit (don\'t send anything)')
+
+        parser.add_argument('--show-html',
+                            action='store_true',
+                            dest='show_html',
+                            default=None,
+                            help='output the rendered html body of the first user-digest generated, and ' \
+                            'exit (don\'t send anything)')
 
     def get_specific_users(self, user_ids):
         # this makes an individual HTTP request for each user -
