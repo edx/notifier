@@ -8,7 +8,6 @@ import struct
 
 from django.conf import settings
 from django.template.loader import get_template
-from django.template import Context
 from django.utils.html import strip_tags
 from django.utils.translation import ugettext as _, activate, deactivate
 from statsd import statsd
@@ -228,7 +227,7 @@ def render_digest(user, digest, title, description):
     Returns two strings: (text_body, html_body).
     """
     logger.info("rendering email message: {user_id: %s}", user['id'])
-    context = Context({
+    context = {
         'user': user,
         'digest': digest,
         'title': title,
@@ -239,7 +238,7 @@ def render_digest(user, digest, title, description):
         'logo_image_url': settings.LOGO_IMAGE_URL,
         'unsubscribe_url': _get_unsubscribe_url(user),
         'postal_address': settings.EMAIL_SENDER_POSTAL_ADDRESS,
-        })
+        }
 
     with _activate_user_lang(user):
         text = get_template('digest-email.txt').render(context)
