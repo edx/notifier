@@ -2,16 +2,12 @@
 """
 import datetime
 
-import celery
-from dateutil.parser import parse as date_parse
-from django.conf import settings
-from django.core.management.base import BaseCommand, CommandError
-from django.core.serializers.json import DjangoJSONEncoder
 import json
 import logging
-import pytz
-import requests
-import sys
+from dateutil.parser import parse as date_parse
+from django.conf import settings
+from django.core.management.base import BaseCommand
+from django.core.serializers.json import DjangoJSONEncoder
 
 from notifier.digest import render_digest, Digest, DigestCourse, DigestThread, DigestItem
 from notifier.pull import generate_digest_content
