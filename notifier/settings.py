@@ -3,6 +3,9 @@ import logging
 import os
 import platform
 
+# Change this
+SECRET_KEY = "bI7S2DOOdOLHu3pry1hr2glKlBvBRIB9Uz9CjjI69nOdFyyhsLww06y95z3caIoC0H6RzwLQQe0B9gE43QUM4hjBy6OHhpv1Fwil"
+
 DATABASES = {
     'default': {
         # Database backend defaults to 'sqlite3', but 'mysql' is also supported.
