@@ -211,3 +211,5 @@ LOCALE_PATHS = (os.path.join(os.path.dirname(os.path.dirname(__file__)), 'locale
 LOGO_IMAGE_URL = os.getenv('LOGO_IMAGE_URL', "{}/static/images/edx-theme/edx-logo-77x36.png".format(LMS_URL_BASE))
 
 DEAD_MANS_SNITCH_URL = os.getenv('DEAD_MANS_SNITCH_URL', '')
+
+SECRET_KEY = os.getenv('SECRET_KEY', 'secret_key')

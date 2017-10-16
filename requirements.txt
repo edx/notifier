@@ -1,14 +1,15 @@
-Django==1.4.22
+Django==1.8
 amqp==1.4.7
 APScheduler==3.0.4
 autopep8==1.2.1
 billiard==3.3.0.21
+boto==2.48
 celery==3.1.19
 coverage==4.0.1
 django-celery==3.1.17
 django-configurations==0.8
 django-coverage==1.2.4
-django-ses==0.7.0
+django-ses==0.8.3.1
 dogapi==1.11.1
 dogstatsd-python==0.5.6
 kombu==3.0.37
