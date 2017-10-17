@@ -42,7 +42,7 @@ class Command(BaseCommand):
                     action='store',
                     dest='to_datetime',
                     default=None,
-                    help='datetime as of which to generate digest content, in ISO-8601 format (UTC).  Defaults to today at midnight (UTC).'),
+                    help='datetime as of which to generate digest content, in ISO-8601 format (UTC).  Defaults to today at 00:00 (UTC).'),
         make_option('--minutes',
                     action='store',
                     dest='minutes',
