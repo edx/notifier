@@ -4,3 +4,4 @@
 notifier.db
 *.DS_Store
 notifier.log
+venvs

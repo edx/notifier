@@ -184,7 +184,7 @@ class TasksTestCase(TestCase):
             task_result = do_forums_digests.delay()
             self.assertTrue(task_result.successful())
             self.assertEqual(t.delay.call_count, 2)
-            t.delay.assert_called_with([usern(10)], dt1, dt2)
+            t.delay.assert_called_with([usern(10)], dt1, dt2, language=settings.LANGUAGE_CODE)
 
 
     @override_settings(FORUM_DIGEST_TASK_BATCH_SIZE=10)
