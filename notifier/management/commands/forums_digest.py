@@ -163,7 +163,9 @@ class Command(BaseCommand):
             generate_and_send_digests.delay(
                 some_users,
                 from_datetime,
-                to_datetime)
+                to_datetime,
+                language=settings.LANGUAGE_CODE
+            )
 
         user_batch = []
         for user in users:
