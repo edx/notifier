@@ -1,4 +1,4 @@
-Django==1.8.18
+Django<2.0
 amqp==1.4.7
 APScheduler==3.0.4
 autopep8==1.2.1
