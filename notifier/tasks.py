@@ -21,6 +21,9 @@ from notifier.user import get_digest_subscribers, UserServiceException
 logger = logging.getLogger(__name__)
 
 
+DEFAULT_LANGUAGE = 'en'
+
+
 @celery.task(rate_limit=settings.FORUM_DIGEST_TASK_RATE_LIMIT, max_retries=settings.FORUM_DIGEST_TASK_MAX_RETRIES)
 def generate_and_send_digests(users, from_dt, to_dt, language=None):
     """
@@ -33,7 +36,7 @@ def generate_and_send_digests(users, from_dt, to_dt, language=None):
     `from_dt` and `to_dt` are datetime objects representing the start and end
     of the time window for which to generate a digest.
     """
-    settings.LANGUAGE_CODE = language or settings.LANGUAGE_CODE
+    settings.LANGUAGE_CODE = language or settings.LANGUAGE_CODE or DEFAULT_LANGUAGE
     users_by_id = dict((str(u['id']), u) for u in users)
     msgs = []
     try:
