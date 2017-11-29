@@ -26,3 +26,4 @@ six==1.10.0
 transifex-client
 wsgiref==0.1.2
 -e git+https://github.com/edx/opaque-keys.git@0.1.2#egg=opaque-keys
+redis==2.10.6
