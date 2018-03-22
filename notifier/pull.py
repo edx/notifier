@@ -69,6 +69,15 @@ def _build_digest(user_content, user_info):
         )
     )
 
+def _should_skip_org(course_id):
+    # TODO: Need to implement an end point in LMS to get this list.
+    orgs_to_skip = ["WhartonOnlineProfessionalEd"]
+    skip_course = False
+    for org in orgs_to_skip:
+        if org in course_id:
+            skip_course = True
+    return skip_course
+
 def _build_digest_course(course_id, course_content, user_course_info):
     """
     Transforms thread/item data from the comments service's response for a
@@ -76,23 +85,26 @@ def _build_digest_course(course_id, course_content, user_course_info):
 
     The threads returned will be filtered by a group-level access check.
     """
-    return DigestCourse(
-        course_id,
-        [
-            _build_digest_thread(thread_id, course_id, thread_content)
-            for thread_id, thread_content in course_content.iteritems()
-            if (
-                # the user is allowed to "see all cohorts" in the course, or
-                user_course_info['see_all_cohorts'] or
+    if _should_skip_org(course_id):
+        return DigestCourse(course_id, [])
+    else:
+        return DigestCourse(
+            course_id,
+            [
+                _build_digest_thread(thread_id, course_id, thread_content)
+                for thread_id, thread_content in course_content.iteritems()
+                if (
+                    # the user is allowed to "see all cohorts" in the course, or
+                    user_course_info['see_all_cohorts'] or
 
-                # the thread is not associated with a group, or
-                thread_content.get('group_id') is None or
+                    # the thread is not associated with a group, or
+                    thread_content.get('group_id') is None or
 
-                # the user's cohort_id matches the thread's group_id
-                user_course_info['cohort_id'] == thread_content.get('group_id')
-            )
-        ]
-    )
+                    # the user's cohort_id matches the thread's group_id
+                    user_course_info['cohort_id'] == thread_content.get('group_id')
+                )
+            ]
+        )
 
 def _build_digest_thread(thread_id, course_id, thread_content):
     """
