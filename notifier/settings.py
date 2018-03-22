@@ -192,6 +192,10 @@ BROKER_HEARTBEAT_CHECKRATE = 2
 # Each worker should only fetch one message at a time
 CELERYD_PREFETCH_MULTIPLIER = 1
 
+# Maximum number of tasks a pool worker process can execute
+# before it's replaced with a new one.
+CELERYD_MAX_TASKS_PER_CHILD = 100
+
 LANGUAGE_CODE = os.getenv('NOTIFIER_LANGUAGE', 'en')
 LANGUAGES = (
     ("en", "English"),
