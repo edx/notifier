@@ -82,9 +82,6 @@ US_RESULT_PAGE_SIZE = 10
 LOG_FILE = os.getenv('LOG_FILE')
 LOG_LEVEL = os.getenv('LOG_LEVEL', 'INFO')
 
-# datadog
-DATADOG_API_KEY = os.getenv('DATADOG_API_KEY')
-
 # celery
 import djcelery
 djcelery.setup_loader()

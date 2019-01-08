@@ -11,7 +11,6 @@ from django.template.loader import get_template
 from django.template import Context
 from django.utils.html import strip_tags
 from django.utils.translation import ugettext as _, activate, deactivate
-from statsd import statsd
 from opaque_keys.edx.keys import CourseKey
 
 from notifier.user import DIGEST_NOTIFICATION_PREFERENCE_KEY, LANGUAGE_PREFERENCE_KEY
@@ -209,7 +208,6 @@ class DigestItem(object):
         self.dt = dt
 
 
-@statsd.timed('notifier.digest_render.elapsed')
 def render_digest(user, digest, title, description):
     """
     Generate HTML and plaintext renderings of digest material, suitable for

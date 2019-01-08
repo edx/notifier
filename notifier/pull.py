@@ -6,7 +6,6 @@ import sys
 
 from dateutil.parser import parse as date_parse
 from django.conf import settings
-from dogapi import dog_stats_api
 import requests
 
 from notifier.digest import Digest, DigestCourse, DigestThread, DigestItem
@@ -162,8 +161,7 @@ def generate_digest_content(users_by_id, from_dt, to_dt):
         'to': to_dt.strftime(dt_format)
     }
 
-    with dog_stats_api.timer('notifier.comments_service.time'):
-        logger.info('calling comments service to pull digests for %d user(s)', len(users_by_id))
-        resp = _http_post(api_url, headers=headers, data=data)
+    logger.info('calling comments service to pull digests for %d user(s)', len(users_by_id))
+    resp = _http_post(api_url, headers=headers, data=data)
 
     return process_cs_response(resp.json(), users_by_id)

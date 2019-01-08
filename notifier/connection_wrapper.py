@@ -3,7 +3,6 @@ import time
 
 from django.conf import settings
 from django.core.mail import get_connection as dj_get_connection
-from dogapi import dog_stats_api
 
 logger = logging.getLogger(__name__)
 
@@ -31,9 +30,6 @@ class BackendWrapper(object):
         elapsed = time.time() - t
         if msg_count > 0:
             logger.info('sent %s messages, elapsed: %.3fs' % (msg_count, elapsed))
-            # report an average timing to datadog
-            dog_stats_api.histogram('notifier.send.time', elapsed / msg_count)
-            dog_stats_api.increment('notifier.send.count', msg_count)
             for msg in email_messages:
                 hdrs = dict((k, v) for k, v in dict(msg.message()).iteritems()
                             if k.lower() not in ('date', 'from', 'subject', 'content-type', 'mime-version'))
