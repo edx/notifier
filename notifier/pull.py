@@ -7,6 +7,7 @@ import sys
 from dateutil.parser import parse as date_parse
 from django.conf import settings
 import requests
+import six
 
 from notifier.digest import Digest, DigestCourse, DigestThread, DigestItem
 
@@ -29,7 +30,7 @@ def _http_post(*a, **kw):
         response = requests.post(*a, **kw)
     except requests.exceptions.ConnectionError as e:
         _, msg, tb = sys.exc_info()
-        raise CommentsServiceException, "comments service request failed: {}".format(msg), tb
+        six.reraise(CommentsServiceException, "comments service request failed: {}".format(msg), tb)
     if response.status_code != 200:
         raise CommentsServiceException("comments service HTTP Error {code}: {reason}".format(code=response.status_code, reason=response.reason))
     return response

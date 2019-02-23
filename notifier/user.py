@@ -6,6 +6,7 @@ import sys
 
 from django.conf import settings
 import requests
+import six
 
 
 logger = logging.getLogger(__name__)
@@ -33,7 +34,7 @@ def _http_get(*a, **kw):
         response = requests.get(*a, **kw)
     except requests.exceptions.ConnectionError as e:
         _, msg, tb = sys.exc_info()
-        raise UserServiceException, "request failed: {}".format(msg), tb
+        six.reraise(UserServiceException, "request failed: {}".format(msg), tb)
     if response.status_code != 200:
         raise UserServiceException("HTTP Error {}: {}".format(
             response.status_code,
