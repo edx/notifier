@@ -60,7 +60,7 @@ def _trunc(s, length):
     # truncate, taking an extra -3 off the orig string for the ellipsis itself
     # see above comment about non-BMP support for why this is done in such
     # elaborate fashion.
-    uchr = lambda x: '\U{0:08x}'.format(x).decode('unicode-escape')
+    uchr = lambda x: r'\U{0:08x}'.format(x).decode('unicode-escape')
     return ''.join(uchr(p) for p in pts[:length - 3]).rsplit(' ', 1)[0].strip() + '...'
 
 

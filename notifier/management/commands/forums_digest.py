@@ -103,7 +103,7 @@ class Command(BaseCommand):
             logger.warning('could not show rendered %s: %s', fmt, msg)
 
         try:
-            user_id, digest = generate_digest_content(users_by_id, from_dt, to_dt).next()
+            user_id, digest = next(generate_digest_content(users_by_id, from_dt, to_dt))
         except StopIteration:
             _fail('no digests found')
             return

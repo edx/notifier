@@ -80,7 +80,7 @@ class TasksTestCase(TestCase):
         data = json.load(
             open(join(dirname(__file__), 'cs_notifications.result.json')))
 
-        user_id, digest = self._process_cs_response_with_user_info(data).next()
+        user_id, digest = next(self._process_cs_response_with_user_info(data))
         user = usern(10)
         with patch('notifier.tasks.generate_digest_content', return_value=[(user_id, digest)]) as p:
 
@@ -111,7 +111,7 @@ class TasksTestCase(TestCase):
         ):
             # execute task
             task_result = generate_and_send_digests.delay(
-                (usern(n) for n in xrange(2, 11)), datetime.datetime.now(), datetime.datetime.now())
+                (usern(n) for n in range(2, 11)), datetime.datetime.now(), datetime.datetime.now())
             self.assertTrue(task_result.successful())
 
             # all messages were sent
@@ -142,7 +142,7 @@ class TasksTestCase(TestCase):
                 # give up
                 try:
                     generate_and_send_digests.delay(
-                        [usern(n) for n in xrange(2, 11)], datetime.datetime.now(), datetime.datetime.now())
+                        [usern(n) for n in range(2, 11)], datetime.datetime.now(), datetime.datetime.now())
                 except SESMaxSendingRateExceededError as e:
                     self.assertEqual(
                         mock_backend.send_messages.call_count,
@@ -163,7 +163,7 @@ class TasksTestCase(TestCase):
             expected_num_tries = 1 + settings.FORUM_DIGEST_TASK_MAX_RETRIES
             try:
                 generate_and_send_digests.delay(
-                    [usern(n) for n in xrange(2, 11)], datetime.datetime.now(), datetime.datetime.now())
+                    [usern(n) for n in range(2, 11)], datetime.datetime.now(), datetime.datetime.now())
             except CommentsServiceException as e:
                 self.assertEqual(mock_cs_call.call_count, expected_num_tries)
             else:
@@ -177,7 +177,7 @@ class TasksTestCase(TestCase):
         dt1 = datetime.datetime.utcnow()
         dt2 = dt1 + datetime.timedelta(days=1)
         with nested(
-            patch('notifier.tasks.get_digest_subscribers', return_value=(usern(n) for n in xrange(11))),
+            patch('notifier.tasks.get_digest_subscribers', return_value=(usern(n) for n in range(11))),
             patch('notifier.tasks.generate_and_send_digests'),
             patch('notifier.tasks._time_slice', return_value=(dt1, dt2))
         ) as (p, t, ts):
@@ -214,7 +214,7 @@ class TasksTestCase(TestCase):
         dt1 = datetime.datetime.utcnow()
         dt2 = dt1 + datetime.timedelta(days=1)
         with nested(
-            patch('notifier.tasks.get_digest_subscribers', return_value=(usern(n) for n in xrange(11))),
+            patch('notifier.tasks.get_digest_subscribers', return_value=(usern(n) for n in range(11))),
             patch('notifier.tasks.generate_and_send_digests'),
             patch('notifier.tasks._time_slice', return_value=(dt1, dt2))
         ) as (p, t, ts):
@@ -237,7 +237,7 @@ class TasksTestCase(TestCase):
         dt3 = dt2 + datetime.timedelta(days=1)
         # Scheduling the task for the first time sends the digests:
         with nested(
-            patch('notifier.tasks.get_digest_subscribers', return_value=(usern(n) for n in xrange(10))),
+            patch('notifier.tasks.get_digest_subscribers', return_value=(usern(n) for n in range(10))),
             patch('notifier.tasks._time_slice', return_value=(dt1, dt2)),
             patch('notifier.tasks.generate_and_send_digests')
         ) as (_gs, _ts, t):
@@ -246,7 +246,7 @@ class TasksTestCase(TestCase):
             self.assertEqual(t.delay.call_count, 1)
         # Scheduling the task with the same time slice again does nothing:
         with nested(
-            patch('notifier.tasks.get_digest_subscribers', return_value=(usern(n) for n in xrange(10))),
+            patch('notifier.tasks.get_digest_subscribers', return_value=(usern(n) for n in range(10))),
             patch('notifier.tasks._time_slice', return_value=(dt1, dt2)),
             patch('notifier.tasks.generate_and_send_digests')
         ) as (_gs, _ts, t):
@@ -255,7 +255,7 @@ class TasksTestCase(TestCase):
             self.assertEqual(t.delay.call_count, 0)
         # Scheduling the task with a different time slice sends the digests:
         with nested(
-            patch('notifier.tasks.get_digest_subscribers', return_value=(usern(n) for n in xrange(10))),
+            patch('notifier.tasks.get_digest_subscribers', return_value=(usern(n) for n in range(10))),
             patch('notifier.tasks._time_slice', return_value=(dt2, dt3)),
             patch('notifier.tasks.generate_and_send_digests')
         ) as (_gs, _ts, t):
@@ -276,7 +276,7 @@ class TasksTestCase(TestCase):
             # Bypass field's auto_now_add by forcing the update via query manager.
             ForumDigestTask.objects.filter(pk=task.pk).update(created=dt)
         with nested(
-            patch('notifier.tasks.get_digest_subscribers', return_value=(usern(n) for n in xrange(11))),
+            patch('notifier.tasks.get_digest_subscribers', return_value=(usern(n) for n in range(11))),
             patch('notifier.tasks.generate_and_send_digests'),
         ) as (p, t):
             # Two of the tasks that we created above are older than 5 days.

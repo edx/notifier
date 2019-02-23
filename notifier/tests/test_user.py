@@ -109,13 +109,13 @@ class UserTestCase(TestCase):
         with patch('requests.get', return_value=mock_response) as p:
             res = []
             g = get_digest_subscribers()
-            res.append(g.next())
+            res.append(next(g))
             p.assert_called_once_with(
                 self.expected_api_url,
                 params=self.expected_params,
                 headers=self.expected_headers)
-            res.append(g.next())
-            res.append(g.next()) # result 3, end of page
+            res.append(next(g))
+            res.append(next(g)) # result 3, end of page
             self.assertEqual([
                 mkexpected(mkresult(1)),
                 mkexpected(mkresult(2)),
@@ -126,12 +126,12 @@ class UserTestCase(TestCase):
         mock_response = make_mock_json_response(json=expected_multi_p2)
         with patch('requests.get', return_value=mock_response) as p:
             self.expected_params['page']=2
-            self.assertEqual(mkexpected(mkresult(4)), g.next())
+            self.assertEqual(mkexpected(mkresult(4)), next(g))
             p.assert_called_once_with(
                 self.expected_api_url,
                 params=self.expected_params,
                 headers=self.expected_headers)
-            self.assertEqual(mkexpected(mkresult(5)), g.next())
+            self.assertEqual(mkexpected(mkresult(5)), next(g))
             self.assertEqual(1, p.call_count)
             self.assertRaises(StopIteration, g.next)
 

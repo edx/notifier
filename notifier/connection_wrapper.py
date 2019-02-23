@@ -43,7 +43,7 @@ class BackendWrapper(object):
         # never raise Exceptions on close().
         try:
             self._backend.close()
-        except Exception, e:
+        except Exception as e:
             logger.debug("self._backend.close() failed: %s", e)
 
     def __getattr__(self, a):

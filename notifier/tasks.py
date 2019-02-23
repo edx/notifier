@@ -155,5 +155,5 @@ def do_forums_digests(self):
     try:
         for user_batch in batch_digest_subscribers():
             generate_and_send_digests.delay(user_batch, from_dt, to_dt, language=settings.LANGUAGE_CODE)
-    except UserServiceException, e:
+    except UserServiceException as e:
         raise do_forums_digests.retry(exc=e)
