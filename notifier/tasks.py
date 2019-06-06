@@ -24,7 +24,8 @@ logger = logging.getLogger(__name__)
 DEFAULT_LANGUAGE = 'en'
 
 
-@celery.task(rate_limit=settings.FORUM_DIGEST_TASK_RATE_LIMIT, max_retries=settings.FORUM_DIGEST_TASK_MAX_RETRIES)
+@celery.task(rate_limit=settings.FORUM_DIGEST_TASK_RATE_LIMIT,
+             max_retries=settings.FORUM_DIGEST_TASK_MAX_RETRIES)
 def generate_and_send_digests(users, from_dt, to_dt, language=None):
     """
     This task generates and sends forum digest emails to multiple users in a
@@ -97,7 +98,7 @@ def _time_slice(minutes, now=None):
     >>> e = None
     >>> try:
     ...     _time_slice(14, datetime(2013, 1, 2, 0, 0))
-    ... except AssertionError, e:
+    ... except AssertionError as e:
     ...     pass
     ... 
     >>> e is not None
@@ -116,8 +117,7 @@ def _time_slice(minutes, now=None):
 @celery.task(
     bind=True,
     max_retries=settings.DAILY_TASK_MAX_RETRIES,
-    default_retry_delay=settings.DAILY_TASK_RETRY_DELAY
-)
+    default_retry_delay=settings.DAILY_TASK_RETRY_DELAY)
 def do_forums_digests(self):
 
     def batch_digest_subscribers():
