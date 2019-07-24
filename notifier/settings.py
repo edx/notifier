@@ -76,7 +76,7 @@ US_URL_BASE = os.getenv('US_URL_BASE', 'http://localhost:8000')
 US_API_KEY = os.getenv('US_API_KEY', 'PUT_YOUR_API_KEY_HERE')
 US_HTTP_AUTH_USER = os.getenv('US_HTTP_AUTH_USER', '')
 US_HTTP_AUTH_PASS = os.getenv('US_HTTP_AUTH_PASS', '')
-US_RESULT_PAGE_SIZE = int(os.getenv('US_RESULT_PAGE_SIZE', 10))
+US_RESULT_PAGE_SIZE = int(os.getenv('US_RESULT_PAGE_SIZE', 40))
 
 # Logging
 LOG_FILE = os.getenv('LOG_FILE')
