@@ -27,7 +27,7 @@ options): ``python manage.py forums_digest``
 Internationalization and Localization
 ----
 
-edX uses Transifex to host translations. To use the Transifex client, be sure it is installed (``pip install -r requirements.txt`` will do this for you), and follow the instructions here__ to set up your ``.transifexrc`` file.
+edX uses Transifex to host translations. To use the Transifex client, be sure it is installed (``pip install -r requirements/base.txt`` will do this for you), and follow the instructions here__ to set up your ``.transifexrc`` file.
 
 __ http://support.transifex.com/customer/portal/articles/1000855-configuring-the-client
 
