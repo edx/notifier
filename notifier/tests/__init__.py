@@ -2,6 +2,8 @@
 Explicitly load all the test modules so django's test runner finds them.
 """
 
+from __future__ import absolute_import
+from __future__ import unicode_literals
 import unittest
 import doctest
 

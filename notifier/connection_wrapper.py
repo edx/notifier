@@ -1,8 +1,11 @@
+from __future__ import absolute_import
+from __future__ import unicode_literals
 import logging
 import time
 
 from django.conf import settings
 from django.core.mail import get_connection as dj_get_connection
+import six
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +34,7 @@ class BackendWrapper(object):
         if msg_count > 0:
             logger.info('sent %s messages, elapsed: %.3fs' % (msg_count, elapsed))
             for msg in email_messages:
-                hdrs = dict((k, v) for k, v in dict(msg.message()).iteritems()
+                hdrs = dict((k, v) for k, v in six.iteritems(dict(msg.message()))
                             if k.lower() not in ('date', 'from', 'subject', 'content-type', 'mime-version'))
                 logger.info("sent email: {}".format(repr(hdrs)))
         if msg_count != len(email_messages):

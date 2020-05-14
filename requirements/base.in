@@ -1,27 +1,23 @@
-Django==1.8.18
-amqp==1.4.9
-APScheduler==3.0.4
-autopep8==1.2.1
-billiard==3.3.0.21
-boto==2.48
-celery==3.1.19
-coverage==4.0.1
-django-celery==3.1.17
-django-configurations==0.8
-django-coverage==1.2.4
-django-ses==0.8.3.1
-kombu==3.0.37
-logilab-astng==0.24.3
-logilab-common==1.1.0
-mock==1.0.1
-MySQL-python==1.2.5; python_version < '3.0'
-mysqlclient==1.4.2.post1; python_version >= '3.0'
-pep8==1.6.2
-pylint==1.4.4
-python-dateutil==2.4.2
-pytz==2016.10
-requests==2.22.0
-six==1.11.0
-transifex-client
--e git+https://github.com/edx/opaque-keys.git@0.1.2#egg=opaque-keys
-redis==2.10.6
+# Core requirements for using this application
+-c constraints.txt
+
+Django
+amqp
+APScheduler
+billiard
+boto
+celery
+django-celery
+django-configurations
+django-coverage
+django-ses
+kombu
+logilab-astng
+logilab-common
+mysqlclient
+python-dateutil
+pytz
+requests
+six
+redis
+-e git+https://github.com/edx/opaque-keys.git@0.3.0#egg=opaque-keys

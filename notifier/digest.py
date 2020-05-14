@@ -2,6 +2,8 @@
 General formatting and rendering helpers for digest notifications.
 """
 
+from __future__ import absolute_import
+from __future__ import unicode_literals
 from contextlib import contextmanager
 import logging
 import struct
@@ -52,7 +54,7 @@ def _trunc(s, length):
 
     s = s.strip()
     u = s.encode('utf-32-le')
-    pts = struct.unpack('<{}L'.format(len(u) / 4), u)
+    pts = struct.unpack('<{}L'.format(len(u) // 4), u)
     if len(pts) <= length:
         # nothing to do
         return s
@@ -60,7 +62,7 @@ def _trunc(s, length):
     # truncate, taking an extra -3 off the orig string for the ellipsis itself
     # see above comment about non-BMP support for why this is done in such
     # elaborate fashion.
-    uchr = lambda x: r'\U{0:08x}'.format(x).decode('unicode-escape')
+    uchr = lambda x: '\\U{0:08x}'.format(x).encode().decode('unicode-escape')
     return ''.join(uchr(p) for p in pts[:length - 3]).rsplit(' ', 1)[0].strip() + '...'
 
 
@@ -102,7 +104,7 @@ def _make_text_list(values):
     elif len(values) == 2:
         return pair_sep.join(values)
     else:
-        return u'{head}{final_list_sep}{tail}'.format(
+        return '{head}{final_list_sep}{tail}'.format(
             head=list_sep.join(values[:-1]),
             final_list_sep=final_list_sep,
             tail=values[-1]

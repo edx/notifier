@@ -1,6 +1,8 @@
 """
 Celery tasks for generating and sending digest emails.
 """
+from __future__ import absolute_import
+from __future__ import unicode_literals
 from contextlib import closing
 from datetime import datetime, timedelta
 import logging
