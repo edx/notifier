@@ -1,5 +1,8 @@
 """
 """
+from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import unicode_literals
 import datetime
 
 import celery
@@ -115,9 +118,9 @@ class Command(BaseCommand):
             settings.FORUM_DIGEST_EMAIL_DESCRIPTION
         )
         if fmt == 'text':
-            print >> self.stdout, text
+            print(text, file=self.stdout)
         elif fmt == 'html':
-            print >> self.stdout, html
+            print(html, file=self.stdout)
 
     def handle(self, *args, **options):
         """

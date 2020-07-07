@@ -1,6 +1,8 @@
 """
 Functions in support of generating formatted digest emails of forums activity.
 """
+from __future__ import absolute_import
+from __future__ import unicode_literals
 import logging
 import sys
 

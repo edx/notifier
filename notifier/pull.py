@@ -1,6 +1,8 @@
 """
 """
 
+from __future__ import absolute_import
+from __future__ import unicode_literals
 import logging
 import sys
 
@@ -10,6 +12,7 @@ import requests
 import six
 
 from notifier.digest import Digest, DigestCourse, DigestThread, DigestItem
+from six.moves import map
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +33,7 @@ def _http_post(*a, **kw):
         response = requests.post(*a, **kw)
     except requests.exceptions.ConnectionError as e:
         _, msg, tb = sys.exc_info()
-        six.reraise(CommentsServiceException, "comments service request failed: {}".format(msg), tb)
+        six.reraise(CommentsServiceException, CommentsServiceException("comments service request failed: {}".format(msg)), tb)
     if response.status_code != 200:
         raise CommentsServiceException("comments service HTTP Error {code}: {reason}".format(code=response.status_code, reason=response.reason))
     return response
@@ -41,7 +44,7 @@ def process_cs_response(payload, user_info_by_id):
     Transforms and filters the comments service response to generate Digest
     objects for each user supplied in user_info_by_id.
     """
-    for user_id, user_content in payload.iteritems():
+    for user_id, user_content in six.iteritems(payload):
         digest = _build_digest(user_content, user_info_by_id[user_id])
         if not digest.empty:
             yield user_id, digest
@@ -55,18 +58,15 @@ def _build_digest(user_content, user_info):
     been reported to be actively enrolled (by the user service).
     """
     return Digest(
-        filter(
-            lambda c: not c.empty,
-            [
+        [c for c in [
                 _build_digest_course(
                     course_id,
                     course_dict,
                     user_info["course_info"][course_id]
                 )
-                for course_id, course_dict in user_content.iteritems()
+                for course_id, course_dict in six.iteritems(user_content)
                 if course_id in user_info["course_info"]
-            ]
-        )
+            ] if not c.empty]
     )
 
 def _should_skip_org(course_id):
@@ -92,7 +92,7 @@ def _build_digest_course(course_id, course_content, user_course_info):
             course_id,
             [
                 _build_digest_thread(thread_id, course_id, thread_content)
-                for thread_id, thread_content in course_content.iteritems()
+                for thread_id, thread_content in six.iteritems(course_content)
                 if (
                     # the user is allowed to "see all cohorts" in the course, or
                     user_course_info['see_all_cohorts'] or

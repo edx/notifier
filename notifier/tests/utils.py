@@ -1,4 +1,7 @@
+from __future__ import absolute_import
+from __future__ import unicode_literals
 import mock
+import six
 
 
 def make_mock_json_response(status_code=200, json={}):
@@ -18,7 +21,7 @@ def make_user_info(cs_notifications_data):
     cs_notifications_data should be of the structure as returned by the comments service
     """
     user_info = {}
-    for user_id, course_info in cs_notifications_data.iteritems():
+    for user_id, course_info in six.iteritems(cs_notifications_data):
         user_info[user_id] = {
             'course_info': {
                 course_id: {"see_all_cohorts": True, "cohort_id": None}

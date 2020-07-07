@@ -1,5 +1,7 @@
 # coding=utf-8
 
+from __future__ import absolute_import
+from __future__ import unicode_literals
 from uuid import uuid4
 
 from unittest import skip
@@ -19,22 +21,22 @@ class DigestItemTestCase(TestCase):
         self.assertEqual(DigestItem(input_text, None, None).body, expected_text)
 
     def test_ascii(self):
-        self._test_unicode_data(u"This post contains ASCII.", u"This post...")
+        self._test_unicode_data("This post contains ASCII.", "This post...")
 
     def test_latin_1(self):
-        self._test_unicode_data(u"Thís pøst çòñtáins Lätin-1 tæxt", u"Thís pøst...")
+        self._test_unicode_data("Thís pøst çòñtáins Lätin-1 tæxt", "Thís pøst...")
 
     def test_CJK(self):
-        self._test_unicode_data(u"ｲんﾉ丂 ｱo丂ｲ co刀ｲﾑﾉ刀丂 cﾌズ", u"ｲんﾉ丂 ｱo丂ｲ...")
+        self._test_unicode_data("ｲんﾉ丂 ｱo丂ｲ co刀ｲﾑﾉ刀丂 cﾌズ", "ｲんﾉ丂 ｱo丂ｲ...")
 
     def test_non_BMP(self):
-        self._test_unicode_data(u"𝕋𝕙𝕚𝕤 𝕡𝕠𝕤𝕥 𝕔𝕠𝕟𝕥𝕒𝕚𝕟𝕤 𝕔𝕙𝕒𝕣𝕒𝕔𝕥𝕖𝕣𝕤 𝕠𝕦𝕥𝕤𝕚𝕕𝕖 𝕥𝕙𝕖 𝔹𝕄ℙ", u"𝕋𝕙𝕚𝕤 𝕡𝕠𝕤𝕥...")
+        self._test_unicode_data("𝕋𝕙𝕚𝕤 𝕡𝕠𝕤𝕥 𝕔𝕠𝕟𝕥𝕒𝕚𝕟𝕤 𝕔𝕙𝕒𝕣𝕒𝕔𝕥𝕖𝕣𝕤 𝕠𝕦𝕥𝕤𝕚𝕕𝕖 𝕥𝕙𝕖 𝔹𝕄ℙ", "𝕋𝕙𝕚𝕤 𝕡𝕠𝕤𝕥...")
 
     def test_special_chars(self):
-        self._test_unicode_data(u"\" This , post > contains < delimiter ] and [ other } special { characters ; that & may ' break things", u"\" This , post...")
+        self._test_unicode_data("\" This , post > contains < delimiter ] and [ other } special { characters ; that & may ' break things", "\" This , post...")
 
     def test_string_interp(self):
-        self._test_unicode_data(u"This post contains %s string interpolation #{syntax}", u"This post...")
+        self._test_unicode_data("This post contains %s string interpolation #{syntax}", "This post...")
 
 
 @patch("notifier.digest.THREAD_TITLE_MAXLEN", 17)
@@ -43,22 +45,22 @@ class DigestThreadTestCase(TestCase):
         self.assertEqual(DigestThread("0", TEST_COURSE_ID, TEST_COMMENTABLE, input_text, []).title, expected_text)
 
     def test_ascii(self):
-        self._test_unicode_data(u"This post contains ASCII.", u"This post...")
+        self._test_unicode_data("This post contains ASCII.", "This post...")
 
     def test_latin_1(self):
-        self._test_unicode_data(u"Thís pøst çòñtáins Lätin-1 tæxt", u"Thís pøst...")
+        self._test_unicode_data("Thís pøst çòñtáins Lätin-1 tæxt", "Thís pøst...")
 
     def test_CJK(self):
-        self._test_unicode_data(u"ｲんﾉ丂 ｱo丂ｲ co刀ｲﾑﾉ刀丂 cﾌズ", u"ｲんﾉ丂 ｱo丂ｲ...")
+        self._test_unicode_data("ｲんﾉ丂 ｱo丂ｲ co刀ｲﾑﾉ刀丂 cﾌズ", "ｲんﾉ丂 ｱo丂ｲ...")
 
     def test_non_BMP(self):
-        self._test_unicode_data(u"𝕋𝕙𝕚𝕤 𝕡𝕠𝕤𝕥 𝕔𝕠𝕟𝕥𝕒𝕚𝕟𝕤 𝕔𝕙𝕒𝕣𝕒𝕔𝕥𝕖𝕣𝕤 𝕠𝕦𝕥𝕤𝕚𝕕𝕖 𝕥𝕙𝕖 𝔹𝕄ℙ", u"𝕋𝕙𝕚𝕤 𝕡𝕠𝕤𝕥...")
+        self._test_unicode_data("𝕋𝕙𝕚𝕤 𝕡𝕠𝕤𝕥 𝕔𝕠𝕟𝕥𝕒𝕚𝕟𝕤 𝕔𝕙𝕒𝕣𝕒𝕔𝕥𝕖𝕣𝕤 𝕠𝕦𝕥𝕤𝕚𝕕𝕖 𝕥𝕙𝕖 𝔹𝕄ℙ", "𝕋𝕙𝕚𝕤 𝕡𝕠𝕤𝕥...")
 
     def test_special_chars(self):
-        self._test_unicode_data(u"\" This , post > contains < delimiter ] and [ other } special { characters ; that & may ' break things", u"\" This , post...")
+        self._test_unicode_data("\" This , post > contains < delimiter ] and [ other } special { characters ; that & may ' break things", "\" This , post...")
 
     def test_string_interp(self):
-        self._test_unicode_data(u"This post contains %s string interpolation #{syntax}", u"This post...")
+        self._test_unicode_data("This post contains %s string interpolation #{syntax}", "This post...")
 
 
 @patch("notifier.digest.THREAD_TITLE_MAXLEN", 17)
@@ -93,26 +95,26 @@ class RenderDigestTestCase(TestCase):
         self.assertIn(expected_html if expected_html else expected_text, rendered_html)
 
     def test_ascii(self):
-        self._test_unicode_data(u"This post contains ASCII.", u"This post...")
+        self._test_unicode_data("This post contains ASCII.", "This post...")
 
     def test_latin_1(self):
-        self._test_unicode_data(u"Thís pøst çòñtáins Lätin-1 tæxt", u"Thís pøst...")
+        self._test_unicode_data("Thís pøst çòñtáins Lätin-1 tæxt", "Thís pøst...")
 
     def test_CJK(self):
-        self._test_unicode_data(u"ｲんﾉ丂 ｱo丂ｲ co刀ｲﾑﾉ刀丂 cﾌズ", u"ｲんﾉ丂 ｱo丂ｲ...")
+        self._test_unicode_data("ｲんﾉ丂 ｱo丂ｲ co刀ｲﾑﾉ刀丂 cﾌズ", "ｲんﾉ丂 ｱo丂ｲ...")
 
     def test_non_BMP(self):
-        self._test_unicode_data(u"𝕋𝕙𝕚𝕤 𝕡𝕠𝕤𝕥 𝕔𝕠𝕟𝕥𝕒𝕚𝕟𝕤 𝕔𝕙𝕒𝕣𝕒𝕔𝕥𝕖𝕣𝕤 𝕠𝕦𝕥𝕤𝕚𝕕𝕖 𝕥𝕙𝕖 𝔹𝕄ℙ", u"𝕋𝕙𝕚𝕤 𝕡𝕠𝕤𝕥...")
+        self._test_unicode_data("𝕋𝕙𝕚𝕤 𝕡𝕠𝕤𝕥 𝕔𝕠𝕟𝕥𝕒𝕚𝕟𝕤 𝕔𝕙𝕒𝕣𝕒𝕔𝕥𝕖𝕣𝕤 𝕠𝕦𝕥𝕤𝕚𝕕𝕖 𝕥𝕙𝕖 𝔹𝕄ℙ", "𝕋𝕙𝕚𝕤 𝕡𝕠𝕤𝕥...")
 
     def test_special_chars(self):
         self._test_unicode_data(
-            u"\" This , post > contains < delimiter ] and [ other } special { characters ; that & may ' break things",
-            u"\" This , post...",
-            u"&quot; This , post..."
+            "\" This , post > contains < delimiter ] and [ other } special { characters ; that & may ' break things",
+            "\" This , post...",
+            "&quot; This , post..."
         )
 
     def test_string_interp(self):
-        self._test_unicode_data(u"This post contains %s string interpolation #{syntax}", u"This post...")
+        self._test_unicode_data("This post contains %s string interpolation #{syntax}", "This post...")
 
     @patch("notifier.digest.deactivate")
     @patch("notifier.digest.activate")

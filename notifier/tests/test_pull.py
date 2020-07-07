@@ -1,6 +1,8 @@
 """
 """
 
+from __future__ import absolute_import
+from __future__ import unicode_literals
 import datetime
 import random
 import itertools
@@ -25,6 +27,7 @@ from notifier.pull import (
 )
 
 from .utils import make_mock_json_response, make_user_info
+import six
 
 
 class DigestTestCase(TestCase):
@@ -107,7 +110,7 @@ class CommentsServiceResponseTestCase(DigestTestCase):
         self.assertEqual(dts, sorted(dts, reverse=True))
 
     def _find_raw_thread(self, parsed_thread, course_id, raw_threads):
-        for thread_id, raw_thread in raw_threads.iteritems():
+        for thread_id, raw_thread in six.iteritems(raw_threads):
             try:
                 self._check_thread(thread_id, course_id, raw_thread, parsed_thread)
                 return raw_thread
@@ -125,7 +128,7 @@ class CommentsServiceResponseTestCase(DigestTestCase):
         self.assertEqual(dts, sorted(dts, reverse=True))
 
     def _find_raw_course(self, parsed_course, raw_courses):
-        for course_id, raw_course in raw_courses.iteritems():
+        for course_id, raw_course in six.iteritems(raw_courses):
             try:
                 self._check_course(course_id, raw_course, parsed_course)
                 return raw_course
@@ -141,7 +144,7 @@ class CommentsServiceResponseTestCase(DigestTestCase):
         self.assertEqual(lower_titles, sorted(lower_titles))
 
     def _find_raw_digest(self, parsed_digest, raw_payload):
-        for user_id, raw_digest in raw_payload.iteritems():
+        for user_id, raw_digest in six.iteritems(raw_payload):
             try:
                 self._check_digest(user_id, raw_digest, parsed_digest)
                 return raw_digest
@@ -252,7 +255,7 @@ class GenerateDigestContentTestCase(DigestTestCase):
                 'to': '2013-01-02 00:00:00'
             }
             p.assert_called_once_with(expected_api_url, headers=expected_headers, data=expected_post_data)            
-            self.assertRaises(StopIteration, g.next)
+            self.assertRaises(StopIteration, next, g)
 
     # TODO: test_single_result, test_multiple_results
 
@@ -346,7 +349,7 @@ class GenerateDigestContentTestCase(DigestTestCase):
                 "expected_threads": [],
             },
         }
-        user_ids = users_by_id.keys()
+        user_ids = list(users_by_id.keys())
 
         # Create a mock payload with digest information as would be returned by the comments service.
         payload = {
@@ -377,7 +380,7 @@ class GenerateDigestContentTestCase(DigestTestCase):
             # Otherwise, it's possible the guts of the for loop below never gets called.
             self.assertEquals(
                 len(filtered_digests),
-                len(filter(lambda u: len(u["expected_threads"]) > 0, users_by_id.values()))
+                len([u for u in list(users_by_id.values()) if len(u["expected_threads"]) > 0])
             )
 
             # Verify the returned digests are as expected for each user.

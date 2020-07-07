@@ -1,19 +1,13 @@
+dist: xenial
 language: python
-matrix:
-  allow_failures:
-    - python: "3.6"
-    - python: "3.7"
-  include:
-    - python: "2.7"
-    - python: "3.6"
-    - python: "3.7"
-      dist: xenial  # required for Python >= 3.7 (travis-ci/travis-ci#9069)
+python:
+- 2.7
+- 3.5
 branches:
   only:
     - master
 install:
-  - pip install -r requirements/base.txt
-  - pip install coveralls
+  - pip install -r requirements/travis.txt
 script:
   - sudo rm -f /etc/boto.cfg && python manage.py test notifier
 after_success:

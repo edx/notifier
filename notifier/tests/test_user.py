@@ -1,5 +1,7 @@
 """
 """
+from __future__ import absolute_import
+from __future__ import unicode_literals
 from django.test import TestCase
 from django.test.utils import override_settings
 from mock import patch
@@ -133,7 +135,7 @@ class UserTestCase(TestCase):
                 headers=self.expected_headers)
             self.assertEqual(mkexpected(mkresult(5)), next(g))
             self.assertEqual(1, p.call_count)
-            self.assertRaises(StopIteration, g.next)
+            self.assertRaises(StopIteration, next, g)
 
 
     @override_settings(US_URL_BASE="test_server_url", US_RESULT_PAGE_SIZE=3, US_HTTP_AUTH_USER='someuser', US_HTTP_AUTH_PASS='somepass')
