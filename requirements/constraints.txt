@@ -11,10 +11,13 @@
 # TODO: Many pinned dependencies should be unpinned and/or moved to this constraints file.
 
 # Use latest Django LTS version
-Django<1.8.19
+Django<2
 
 # mock version 4.0.0 drops support for python 3.5
 mock<4.0.0
+
+# edx-lint remove support for python 2 after this version
+edx-lint<1.5.0
 
 # Already in python3 standard library
 futures; python_version == "2.7"

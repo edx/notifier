@@ -123,7 +123,7 @@ class RenderDigestTestCase(TestCase):
         self.user["preferences"][LANGUAGE_PREFERENCE_KEY] = user_lang
         render_digest(self.user, self.digest, "dummy", "dummy")
         mock_activate.assert_called_with(user_lang)
-        mock_deactivate.assert_called()
+        self.assertTrue(mock_deactivate.called)
 
     @patch("notifier.digest.activate")
     def test_user_lang_pref_unsupported(self, mock_activate):
