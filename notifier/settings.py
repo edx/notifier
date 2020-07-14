@@ -1,9 +1,14 @@
 from __future__ import absolute_import
 from __future__ import unicode_literals
 from datetime import timedelta
+from os.path import abspath, dirname, join
 import logging
 import os
 import platform
+
+here = lambda *x: join(abspath(dirname(__file__)), *x)
+PROJECT_ROOT = here('..')
+root = lambda *x: abspath(join(abspath(PROJECT_ROOT), *x))
 
 DATABASES = {
     'default': {
@@ -29,6 +34,24 @@ INSTALLED_APPS = (
 )
 
 SERVICE_NAME = 'notifier'
+
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'APP_DIRS': True,
+        'DIRS': (
+            root('templates'),
+        ),
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]
 
 # Misc. Notifier Formatting
 
