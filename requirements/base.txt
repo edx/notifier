@@ -9,33 +9,36 @@ amqp==1.4.9               # via -r requirements/base.in, kombu
 anyjson==0.3.3            # via kombu
 apscheduler==3.6.3        # via -r requirements/base.in
 billiard==3.3.0.23        # via -r requirements/base.in, celery
-boto==2.49.0              # via -r requirements/base.in, django-ses
+boto3==1.14.50            # via django-ses
+boto==2.49.0              # via -r requirements/base.in
+botocore==1.17.50         # via boto3, s3transfer
 celery==3.1.26.post2      # via -r requirements/base.in, django-celery
 certifi==2020.6.20        # via requests
 chardet==3.0.4            # via requests
 django-celery==3.3.1      # via -r requirements/base.in
 django-configurations==2.2  # via -r requirements/base.in
 django-coverage==1.2.4    # via -r requirements/base.in
-django-ses==0.8.14        # via -r requirements/base.in
-django==1.11.29           # via -c requirements/constraints.txt, -r requirements/base.in, django-celery
-funcsigs==1.0.2           # via apscheduler
+django-ses==1.0.2         # via -r requirements/base.in
+django==1.11.29           # via -c requirements/constraints.txt, -r requirements/base.in, django-celery, django-ses
+docutils==0.15.2          # via botocore
 future==0.18.2            # via django-ses
-futures==3.3.0 ; python_version == "2.7"  # via -c requirements/constraints.txt, apscheduler
 idna==2.10                # via requests
+jmespath==0.10.0          # via boto3, botocore
 kombu==3.0.37             # via -r requirements/base.in, celery
 logilab-astng==0.24.3     # via -r requirements/base.in
-logilab-common==1.4.4     # via -r requirements/base.in, logilab-astng
-mysqlclient==1.4.6        # via -r requirements/base.in
+logilab-common==1.6.1     # via -r requirements/base.in, logilab-astng
+mysqlclient==2.0.1        # via -r requirements/base.in
 pbr==5.4.5                # via stevedore
-pymongo==3.10.1           # via edx-opaque-keys
-python-dateutil==2.8.1    # via -r requirements/base.in
+pymongo==3.11.0           # via edx-opaque-keys
+python-dateutil==2.8.1    # via -r requirements/base.in, botocore
 pytz==2020.1              # via -r requirements/base.in, apscheduler, celery, django, django-ses, tzlocal
 redis==3.5.3              # via -r requirements/base.in
 requests==2.24.0          # via -r requirements/base.in
-six==1.15.0               # via -r requirements/base.in, apscheduler, django-configurations, edx-opaque-keys, logilab-common, python-dateutil, stevedore
+s3transfer==0.3.3         # via boto3
+six==1.15.0               # via -r requirements/base.in, apscheduler, django-configurations, edx-opaque-keys, python-dateutil, stevedore
 stevedore==1.32.0         # via edx-opaque-keys
 tzlocal==2.1              # via apscheduler
-urllib3==1.25.9           # via requests
+urllib3==1.25.10          # via botocore, requests
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
