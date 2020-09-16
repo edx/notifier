@@ -19,7 +19,7 @@ enum34==1.1.10            # via astroid
 futures==3.3.0 ; python_version == "2.7"  # via -c requirements/constraints.txt, caniusepython3, isort
 idna==2.10                # via requests
 isort==4.3.21             # via -r requirements/quality.in, pylint
-lazy-object-proxy==1.5.0  # via astroid
+lazy-object-proxy==1.5.1  # via astroid
 mccabe==0.6.1             # via pylint
 packaging==20.4           # via caniusepython3
 pycodestyle==2.6.0        # via -r requirements/quality.in
@@ -33,7 +33,7 @@ requests==2.24.0          # via caniusepython3
 singledispatch==3.4.0.3   # via astroid, pylint
 six==1.15.0               # via astroid, edx-lint, packaging, pydocstyle, pylint, singledispatch
 snowballstemmer==2.0.0    # via pydocstyle
-urllib3==1.25.9           # via requests
+urllib3==1.25.10          # via requests
 wrapt==1.12.1             # via astroid
 
 # The following packages are considered to be unsafe in a requirements file:
